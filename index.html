@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MODB · Marine Operation Database</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* ============================= TOKENS ============================= */
+:root{
+  --bg:#F7FAFC;
+  --card:#FFFFFF;
+  --border:#E5EEF5;
+  --primary:#0077B6;
+  --secondary:#005B96;
+  --accent:#00B4D8;
+  --success:#2A9D8F;
+  --warning:#F4A261;
+  --danger:#E76F51;
+  --text-hi:#1F2937;
+  --text-mid:#6B7280;
+  --text-low:#9AA6B2;
+  --font-display:'IBM Plex Sans', sans-serif;
+  --font-body:'Inter', sans-serif;
+  --font-mono:'IBM Plex Mono', monospace;
+  --r-lg:16px;
+  --r-md:12px;
+  --r-sm:8px;
+  --shadow-1: 0 1px 2px rgba(16,40,64,0.05);
+  --shadow-2: 0 6px 20px -8px rgba(16,40,64,0.12);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--bg);color:var(--text-hi);font-family:var(--font-body);-webkit-font-smoothing:antialiased;}
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-thumb{background:#CBD9E3;border-radius:8px;}
+::-webkit-scrollbar-track{background:transparent;}
+button{font-family:inherit;cursor:pointer;}
+input,select{font-family:inherit;}
+
+/* ============================= APP SHELL ============================= */
+.app{display:grid;grid-template-columns:236px 1fr;grid-template-rows:64px 1fr;min-height:100vh;}
+.topbar{
+  grid-column:1/3; grid-row:1; display:flex; align-items:center; justify-content:space-between;
+  padding:0 22px 0 20px; background:var(--card); border-bottom:1px solid var(--border);
+  position:sticky; top:0; z-index:80;
+}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-weight:700;font-size:16.5px;color:var(--text-hi);}
+.brand .mark{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-2);}
+.brand .mark svg{width:17px;height:17px;stroke:#fff;}
+.brand small{display:block;font-family:var(--font-mono);font-weight:400;font-size:10px;color:var(--text-low);letter-spacing:1px;margin-top:1px;}
+
+.top-mid{display:flex;align-items:center;gap:10px;flex:1;justify-content:center;max-width:520px;margin:0 20px;}
+.search-wrap{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);padding:9px 13px;border-radius:10px;color:var(--text-low);font-size:13px;width:100%;}
+.search-wrap svg{width:15px;height:15px;stroke:var(--text-low);flex-shrink:0;}
+.search-wrap input{border:none;background:none;outline:none;color:var(--text-hi);font-size:13px;width:100%;}
+
+.top-right{display:flex;align-items:center;gap:14px;}
+.port-select{border:1px solid var(--border);background:var(--card);color:var(--text-hi);font-size:13px;font-weight:500;padding:8px 12px;border-radius:10px;outline:none;}
+.weather-chip{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--text-mid);background:linear-gradient(135deg,#EAF6FB,#F2FBFD);border:1px solid var(--border);padding:7px 12px;border-radius:10px;}
+.weather-chip svg{width:16px;height:16px;stroke:var(--accent);}
+.weather-chip b{color:var(--text-hi);font-weight:600;}
+.clock{font-family:var(--font-mono);font-size:12.5px;color:var(--text-mid);text-align:right;line-height:1.3;min-width:74px;}
+.clock b{display:block;color:var(--text-hi);font-size:14px;}
+.icon-btn{width:36px;height:36px;border-radius:10px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-mid);position:relative;flex-shrink:0;}
+.icon-btn svg{width:16.5px;height:16.5px;}
+.dot-badge{position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--danger);border:1.5px solid var(--card);}
+.profile{display:flex;align-items:center;gap:9px;padding-left:12px;border-left:1px solid var(--border);}
+.avatar{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--secondary),var(--primary));display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:600;font-size:12.5px;color:#fff;}
+.who{font-size:12px;line-height:1.25;}
+.who b{display:block;font-weight:600;color:var(--text-hi);}
+.who span{color:var(--text-low);font-size:10.5px;}
+
+/* ============================= SIDEBAR ============================= */
+.sidebar{grid-column:1;grid-row:2;background:var(--card);border-right:1px solid var(--border);padding:18px 12px;position:sticky;top:64px;height:calc(100vh - 64px);overflow-y:auto;}
+.nav-group-label{font-family:var(--font-mono);font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-low);padding:14px 12px 6px;}
+.nav-item{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:10px;color:var(--text-mid);font-size:13.5px;font-weight:500;margin-bottom:2px;transition:.15s;}
+.nav-item svg{width:17px;height:17px;flex-shrink:0;}
+.nav-item:hover{background:var(--bg);color:var(--text-hi);}
+.nav-item.active{background:linear-gradient(135deg, rgba(0,119,182,0.09), rgba(0,180,216,0.09));color:var(--primary);font-weight:600;box-shadow:inset 0 0 0 1px rgba(0,119,182,0.15);}
+
+.main{grid-column:2;grid-row:2;padding:24px 26px 60px;max-width:1760px;}
+.page{display:none;}
+.page.active{display:block;}
+
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
+.page-head h1{font-family:var(--font-display);font-size:23px;font-weight:600;margin:0;}
+.page-head .sub{color:var(--text-mid);font-size:13px;margin-top:4px;}
+.live-pill{display:inline-flex;align-items:center;gap:7px;font-family:var(--font-mono);font-size:11px;color:var(--success);background:rgba(42,157,143,0.08);border:1px solid rgba(42,157,143,0.25);padding:6px 12px;border-radius:100px;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--success);animation:pulse 1.8s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+.section-label{font-family:var(--font-mono);font-size:11px;letter-spacing:1.2px;color:var(--secondary);text-transform:uppercase;margin:34px 0 12px;display:flex;align-items:center;gap:10px;}
+.section-label::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent);}
+
+/* card base */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow-1);}
+
+/* ============================= KPI GRID ============================= */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+@media(max-width:1500px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+.kpi{padding:18px 18px 16px;}
+.kpi .top{display:flex;justify-content:space-between;align-items:flex-start;}
+.kpi .ic{width:38px;height:38px;border-radius:11px;background:rgba(0,119,182,0.08);display:flex;align-items:center;justify-content:center;color:var(--primary);}
+.kpi .ic svg{width:18px;height:18px;}
+.kpi .label{font-size:12px;color:var(--text-mid);margin-top:14px;font-weight:500;}
+.kpi .value{font-family:var(--font-display);font-size:25px;font-weight:600;margin-top:3px;}
+.kpi .value small{font-size:12.5px;color:var(--text-low);font-weight:400;margin-left:3px;}
+.kpi .delta{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-family:var(--font-mono);margin-top:8px;padding:3px 8px;border-radius:100px;}
+.delta.up{color:var(--success);background:rgba(42,157,143,0.09);}
+.delta.down{color:var(--danger);background:rgba(231,111,81,0.09);}
+
+/* ============================= GRID LAYOUTS ============================= */
+.grid-2{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;align-items:start;}
+@media(max-width:1400px){.grid-2{grid-template-columns:1fr;}}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+@media(max-width:1400px){.grid-3{grid-template-columns:1fr;}}
+
+/* ============================= PORT MAP ============================= */
+.map-card{padding:20px 20px 14px;}
+.map-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;}
+.map-head h2{font-family:var(--font-display);font-size:16px;font-weight:600;margin:0;}
+.layer-toggles{display:flex;gap:6px;}
+.layer-toggles button{font-size:11.5px;font-weight:500;padding:6px 11px;border-radius:100px;border:1px solid var(--border);background:var(--bg);color:var(--text-mid);}
+.layer-toggles button.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+.map-legend{display:flex;gap:14px;font-size:11px;color:var(--text-mid);font-family:var(--font-mono);margin-top:10px;flex-wrap:wrap;}
+.map-legend span{display:inline-flex;align-items:center;gap:6px;}
+.map-legend i{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.vessel-dot{filter:drop-shadow(0 0 4px rgba(0,119,182,0.5));}
+
+/* ============================= WEATHER/ALERTS ============================= */
+.side-card{padding:18px 20px;margin-bottom:16px;}
+.side-card h2{font-family:var(--font-display);font-size:15px;font-weight:600;margin:0 0 12px;}
+.tide-row{display:flex;justify-content:space-between;font-size:12.5px;padding:7px 0;border-bottom:1px dashed var(--border);}
+.tide-row:last-child{border-bottom:none;}
+.tide-row span:first-child{color:var(--text-mid);}
+.tide-row b{font-family:var(--font-mono);}
+.alert-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);align-items:flex-start;}
+.alert-item:last-child{border-bottom:none;}
+.alert-sev{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.alert-sev.crit{background:var(--danger);}
+.alert-sev.warn{background:var(--warning);}
+.alert-sev.info{background:var(--accent);}
+.alert-title{font-size:12.5px;font-weight:600;}
+.alert-meta{font-size:11px;color:var(--text-low);margin-top:2px;font-family:var(--font-mono);}
+
+/* ============================= TIMELINE (GANTT) ============================= */
+.timeline-card{padding:20px;overflow-x:auto;}
+.tl-axis{display:grid;grid-template-columns:150px repeat(24,1fr);gap:0;margin-bottom:6px;}
+.tl-axis span{font-size:9.5px;color:var(--text-low);font-family:var(--font-mono);text-align:left;border-left:1px solid var(--border);padding-left:3px;}
+.tl-axis .lbl{border-left:none;}
+.tl-row{display:grid;grid-template-columns:150px 1fr;gap:0;align-items:center;margin-bottom:8px;position:relative;}
+.tl-name{font-size:12px;font-weight:500;padding-right:8px;}
+.tl-name small{display:block;color:var(--text-low);font-weight:400;font-family:var(--font-mono);font-size:10px;}
+.tl-track{position:relative;height:26px;background:var(--bg);border-radius:6px;}
+.tl-bar{position:absolute;top:3px;height:20px;border-radius:6px;font-family:var(--font-mono);font-size:9.5px;color:#fff;display:flex;align-items:center;padding:0 8px;white-space:nowrap;overflow:hidden;}
+
+/* ============================= SCHEDULE / CARGO ============================= */
+.sched-item{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);}
+.sched-item:last-child{border-bottom:none;}
+.sched-time{font-family:var(--font-mono);font-size:12px;color:var(--text-mid);width:48px;flex-shrink:0;}
+.sched-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.sched-body{flex:1;font-size:12.5px;}
+.sched-body b{font-weight:600;}
+.sched-body span{display:block;color:var(--text-low);font-size:11px;margin-top:1px;}
+
+.cargo-bar-row{margin-bottom:12px;}
+.cargo-bar-row .lbl{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;}
+.cargo-bar-row .lbl b{font-family:var(--font-mono);}
+.bar-track{height:9px;background:var(--bg);border-radius:6px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:6px;}
+
+.resource-grid-mini{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+.resource-mini{border:1px solid var(--border);border-radius:12px;padding:12px;}
+.resource-mini .n{font-family:var(--font-display);font-size:19px;font-weight:600;}
+.resource-mini .l{font-size:11px;color:var(--text-mid);margin-top:2px;}
+
+/* ============================= VESSEL BOARD ============================= */
+.toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
+.filter-chips{display:flex;gap:6px;flex-wrap:wrap;}
+.chip{font-size:12px;font-weight:500;padding:7px 13px;border-radius:100px;border:1px solid var(--border);background:var(--card);color:var(--text-mid);}
+.chip.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+.view-toggle{display:flex;gap:4px;background:var(--bg);border:1px solid var(--border);padding:3px;border-radius:10px;}
+.view-toggle button{font-size:12px;font-weight:500;padding:6px 12px;border-radius:8px;border:none;background:none;color:var(--text-mid);}
+.view-toggle button.active{background:var(--card);color:var(--primary);box-shadow:var(--shadow-1);}
+
+.table-card{padding:20px;overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:1200px;}
+th{text-align:left;font-family:var(--font-mono);font-size:10px;letter-spacing:0.6px;text-transform:uppercase;color:var(--text-low);font-weight:500;padding:0 10px 10px;border-bottom:1px solid var(--border);white-space:nowrap;}
+td{padding:11px 10px;border-bottom:1px solid var(--border);color:var(--text-mid);font-family:var(--font-mono);font-size:12px;white-space:nowrap;}
+td.name{color:var(--text-hi);font-family:var(--font-body);font-weight:600;}
+tr:hover td{background:#FAFDFF;}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:100px;font-size:10.5px;font-weight:500;}
+.badge i{width:6px;height:6px;border-radius:50%;}
+.badge.g{color:var(--success);background:rgba(42,157,143,0.1);}
+.badge.g i{background:var(--success);}
+.badge.b{color:var(--primary);background:rgba(0,119,182,0.1);}
+.badge.b i{background:var(--primary);}
+.badge.y{color:var(--warning);background:rgba(244,162,97,0.12);}
+.badge.y i{background:var(--warning);}
+.badge.r{color:var(--danger);background:rgba(231,111,81,0.1);}
+.badge.r i{background:var(--danger);}
+.badge.gray{color:var(--text-low);background:#F1F5F8;}
+.badge.gray i{background:var(--text-low);}
+
+/* ============================= RESOURCES PAGE ============================= */
+.berth-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;}
+@media(max-width:1500px){.berth-grid{grid-template-columns:repeat(3,1fr);}}
+.berth-cell{border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center;}
+.berth-cell .bn{font-family:var(--font-display);font-weight:600;font-size:15px;}
+.berth-cell .bstatus{font-size:10.5px;margin-top:4px;font-family:var(--font-mono);}
+.berth-cell .bvessel{font-size:10.5px;color:var(--text-low);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+.res-list-card{padding:20px;}
+.res-list-card h2{font-family:var(--font-display);font-size:15px;font-weight:600;margin:0 0 14px;}
+.res-row{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--border);}
+.res-row:last-child{border-bottom:none;}
+.res-row .rn{font-size:12.5px;font-weight:500;width:110px;flex-shrink:0;}
+.res-row .rtrack{flex:1;}
+.res-row .rval{font-family:var(--font-mono);font-size:11.5px;color:var(--text-mid);width:70px;text-align:right;flex-shrink:0;}
+
+.yard-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin-top:8px;}
+.yard-cell{aspect-ratio:1;border-radius:3px;}
+
+/* ============================= ANALYTICS ============================= */
+.analytics-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+@media(max-width:1400px){.analytics-grid{grid-template-columns:1fr;}}
+.chart-card{padding:20px;}
+.chart-card h3{font-family:var(--font-display);font-size:14.5px;font-weight:600;margin:0 0 2px;}
+.chart-card .sub{font-size:11.5px;color:var(--text-low);margin-bottom:10px;}
+
+.ai-panel{background:linear-gradient(160deg, rgba(0,119,182,0.06), rgba(0,180,216,0.04));border:1px solid rgba(0,119,182,0.18);}
+.ai-panel .ai-head{display:flex;align-items:center;gap:10px;padding:18px 20px 6px;}
+.ai-panel .ai-ic{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;}
+.ai-panel .ai-ic svg{width:17px;height:17px;stroke:#fff;}
+.ai-panel h2{font-family:var(--font-display);font-size:15px;font-weight:600;margin:0;}
+.ai-insight{display:flex;gap:10px;padding:12px 20px;border-top:1px solid rgba(0,119,182,0.1);}
+.ai-insight .aidot{width:6px;height:6px;border-radius:50%;background:var(--primary);margin-top:6px;flex-shrink:0;}
+.ai-insight b{font-size:12.5px;}
+.ai-insight span{display:block;font-size:11.5px;color:var(--text-mid);margin-top:2px;}
+
+.heat-row{display:grid;grid-template-columns:100px repeat(24,1fr);gap:3px;align-items:center;margin-bottom:3px;}
+.heat-row .lbl{font-size:10.5px;color:var(--text-mid);font-family:var(--font-mono);}
+.heat-cell{height:18px;border-radius:4px;}
+.heat-hours{display:grid;grid-template-columns:100px repeat(24,1fr);gap:3px;margin-bottom:6px;}
+.heat-hours span{font-size:9px;color:var(--text-low);text-align:center;font-family:var(--font-mono);}
+
+/* ============================= MESSAGES ============================= */
+.msg-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+.msg-list{display:flex;flex-direction:column;}
+.msg-item{display:grid;grid-template-columns:120px 1fr 150px 150px 90px;gap:14px;align-items:center;padding:13px 0;border-bottom:1px solid var(--border);}
+.msg-item:last-child{border-bottom:none;}
+.msg-source{font-size:11.5px;font-weight:600;padding:5px 10px;border-radius:8px;background:var(--bg);text-align:center;}
+.msg-body b{font-size:12.5px;display:block;}
+.msg-body span{font-size:11px;color:var(--text-low);}
+.msg-time{font-family:var(--font-mono);font-size:11px;color:var(--text-mid);}
+
+/* ============================= REPORTS ============================= */
+.report-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+@media(max-width:1400px){.report-grid{grid-template-columns:1fr 1fr;}}
+.report-card{padding:20px;}
+.report-card .ric{width:38px;height:38px;border-radius:11px;background:rgba(0,119,182,0.08);color:var(--primary);display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
+.report-card .ric svg{width:18px;height:18px;}
+.report-card h3{font-family:var(--font-display);font-size:14.5px;font-weight:600;margin:0 0 4px;}
+.report-card p{font-size:12px;color:var(--text-mid);margin:0 0 14px;line-height:1.5;}
+.export-row{display:flex;gap:8px;}
+.export-btn{flex:1;font-size:11.5px;font-weight:600;padding:8px;border-radius:9px;border:1px solid var(--border);background:var(--bg);color:var(--text-mid);}
+.export-btn:hover{border-color:var(--primary);color:var(--primary);}
+
+/* ============================= DIRECTORY GRIDS ============================= */
+.dir-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+@media(max-width:1400px){.dir-grid{grid-template-columns:1fr 1fr;}}
+.dir-card{padding:18px;}
+.dir-top{display:flex;gap:12px;align-items:center;margin-bottom:12px;}
+.dir-logo{width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,var(--secondary),var(--accent));color:#fff;font-family:var(--font-display);font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.dir-top b{font-size:14px;}
+.dir-top span{display:block;font-size:11px;color:var(--text-low);}
+.dir-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11.5px;color:var(--text-mid);}
+.dir-stats b{display:block;font-family:var(--font-mono);color:var(--text-hi);font-size:14px;font-weight:600;}
+
+/* ============================= TOAST ============================= */
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text-hi);color:#fff;font-size:13px;padding:12px 20px;border-radius:11px;box-shadow:var(--shadow-2);opacity:0;pointer-events:none;transition:.25s;z-index:200;display:flex;align-items:center;gap:8px;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast svg{width:15px;height:15px;stroke:var(--accent);}
+
+/* ============================= AI ASSISTANT ============================= */
+.ai-fab{position:fixed;bottom:26px;right:26px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-2);border:none;z-index:150;}
+.ai-fab svg{width:24px;height:24px;stroke:#fff;}
+.ai-panel-slide{position:fixed;top:0;right:-420px;width:400px;height:100vh;background:var(--card);border-left:1px solid var(--border);box-shadow:-10px 0 30px rgba(16,40,64,0.1);z-index:180;transition:right .25s ease;display:flex;flex-direction:column;}
+.ai-panel-slide.open{right:0;}
+.ai-slide-head{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.ai-slide-head h2{font-family:var(--font-display);font-size:15.5px;margin:0;display:flex;align-items:center;gap:8px;}
+.ai-slide-head .ic{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;}
+.ai-slide-head .ic svg{width:14px;height:14px;stroke:#fff;}
+.ai-close{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text-mid);display:flex;align-items:center;justify-content:center;}
+.ai-close svg{width:14px;height:14px;}
+.ai-quick{display:flex;flex-wrap:wrap;gap:6px;padding:14px 20px;border-bottom:1px solid var(--border);}
+.ai-quick button{font-size:11px;font-weight:500;padding:7px 11px;border-radius:100px;border:1px solid var(--border);background:var(--bg);color:var(--text-mid);text-align:left;}
+.ai-quick button:hover{border-color:var(--primary);color:var(--primary);}
+.ai-chat{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px;}
+.ai-msg{max-width:88%;font-size:12.5px;line-height:1.5;padding:10px 14px;border-radius:12px;}
+.ai-msg.bot{background:var(--bg);border:1px solid var(--border);align-self:flex-start;border-bottom-left-radius:4px;}
+.ai-msg.user{background:var(--primary);color:#fff;align-self:flex-end;border-bottom-right-radius:4px;}
+.ai-input-row{display:flex;gap:8px;padding:14px 20px;border-top:1px solid var(--border);}
+.ai-input-row input{flex:1;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:12.5px;outline:none;}
+.ai-input-row button{width:40px;border-radius:10px;border:none;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;}
+.ai-input-row button svg{width:16px;height:16px;stroke:#fff;}
+
+footer.credits{text-align:center;color:var(--text-low);font-size:11px;font-family:var(--font-mono);margin-top:50px;padding-top:22px;border-top:1px solid var(--border);}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============================= TOPBAR ============================= -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="mark"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 18c2 1.5 4 1.5 6 0s4-1.5 6 0 4 1.5 6 0M5 14l1-6h12l1 6M8 8V5h8v3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div>MODB<small>MARINE OPERATION DATABASE</small></div>
+    </div>
+    <div class="top-mid">
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+        <input placeholder="Search vessel, IMO, voyage, berth…">
+      </div>
+    </div>
+    <div class="top-right">
+      <select class="port-select" id="portSelect">
+        <option>Tanjung Priok</option>
+        <option>Tanjung Perak</option>
+        <option>Belawan</option>
+        <option>Makassar</option>
+        <option>Batam</option>
+      </select>
+      <div class="weather-chip"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M17.5 19a4.5 4.5 0 000-9 6 6 0 00-11.3-1.8A4 4 0 007 16"/></svg><b>29°C</b> Wind 12kt</div>
+      <div class="clock" id="clockBox"><b id="clockTime">--:--:--</b><span id="clockDate">-- --- ----</span></div>
+      <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><span class="dot-badge"></span></button>
+      <div class="profile">
+        <div class="avatar">SH</div>
+        <div class="who"><b>Sari Hutagalung</b><span>Terminal Operator</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================= SIDEBAR ============================= -->
+  <div class="sidebar" id="sidebar">
+    <div class="nav-group-label">Operations</div>
+    <div class="nav-item active" data-page="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Dashboard</div>
+    <div class="nav-item" data-page="vesselboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l2-7h14l2 7"/><path d="M5 17v2h14v-2M7 10V6h10v4"/></svg>Vessel Board</div>
+    <div class="nav-item" data-page="resources"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7l9-4 9 4-9 4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg>Resources</div>
+    <div class="nav-item" data-page="analytics"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-6 3 3 5-8"/></svg>Analytics</div>
+    <div class="nav-item" data-page="executive"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>Executive</div>
+
+    <div class="nav-group-label">Communication</div>
+    <div class="nav-item" data-page="messages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 6l9 7 9-7"/></svg>Messages</div>
+    <div class="nav-item" data-page="reports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l5 5v13H6z"/><path d="M9 12h6M9 16h6M9 8h3"/></svg>Reports</div>
+
+    <div class="nav-group-label">Directory</div>
+    <div class="nav-item" data-page="shippinglines"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21c2 1.2 4 1.2 6 0s4-1.2 6 0 4 1.2 6 0"/><path d="M6 17l.8-8h10.4l.8 8"/><path d="M12 9V4h4l-4 3"/></svg>Shipping Lines</div>
+    <div class="nav-item" data-page="vessels"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l2-7h14l2 7"/><path d="M7 10V6h10v4"/><path d="M2 21c2 1 4 1 6 0s4-1 6 0 4 1 6 0"/></svg>Vessels</div>
+    <div class="nav-item" data-page="ports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>Ports</div>
+  </div>
+
+  <!-- ============================= MAIN ============================= -->
+  <div class="main">
+
+    <!-- ===================== DASHBOARD PAGE ===================== -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-head">
+        <div><h1>Port Operations Dashboard</h1><div class="sub" id="portSub">Tanjung Priok · Real-time operational overview</div></div>
+        <div class="live-pill"><span class="live-dot"></span> LIVE · synced 3s ago</div>
+      </div>
+
+      <div class="kpi-grid" id="kpiGrid"></div>
+
+      <div class="section-label">Live Situational Awareness</div>
+      <div class="grid-2">
+        <div class="card map-card">
+          <div class="map-head">
+            <h2>Interactive Port Map — GIS View</h2>
+            <div class="layer-toggles" id="layerToggles">
+              <button class="active" data-l="berths">Berths</button>
+              <button class="active" data-l="vessels">Vessels</button>
+              <button data-l="wind">Wind</button>
+              <button data-l="channel">Channel</button>
+            </div>
+          </div>
+          <svg id="portMapSvg" viewBox="0 0 900 380" width="100%" style="display:block;"></svg>
+          <div class="map-legend">
+            <span><i style="background:var(--success)"></i>Berthed</span>
+            <span><i style="background:var(--primary)"></i>Underway</span>
+            <span><i style="background:var(--warning)"></i>Anchored</span>
+            <span><i style="background:var(--danger)"></i>Delayed / Alert</span>
+          </div>
+        </div>
+        <div>
+          <div class="card side-card">
+            <h2>Weather &amp; Tide</h2>
+            <div class="tide-row"><span>Condition</span><b>Partly Cloudy, 29°C</b></div>
+            <div class="tide-row"><span>Wind</span><b>ESE 12 kt</b></div>
+            <div class="tide-row"><span>Visibility</span><b>9.5 NM</b></div>
+            <div class="tide-row"><span>Wave Height</span><b>0.6 m</b></div>
+            <div class="tide-row"><span>High Tide</span><b>04:12 · 14:38</b></div>
+            <div class="tide-row"><span>Low Tide</span><b>09:47 · 21:03</b></div>
+            <div class="tide-row"><span>Current Tide Level</span><b>+1.8 m MSL</b></div>
+          </div>
+          <div class="card side-card" style="margin-bottom:0;">
+            <h2>Operational Alerts</h2>
+            <div id="alertList"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-label">ETA / ETD Timeline — Next 24 Hours</div>
+      <div class="card timeline-card">
+        <div class="tl-axis" id="tlAxis"></div>
+        <div id="tlBody"></div>
+      </div>
+
+      <div class="section-label">Schedule, Cargo &amp; Resources</div>
+      <div class="grid-3">
+        <div class="card side-card" style="margin-bottom:0;">
+          <h2>Today's Schedule</h2>
+          <div id="scheduleList"></div>
+        </div>
+        <div class="card side-card" style="margin-bottom:0;">
+          <h2>Cargo Summary</h2>
+          <div id="cargoSummary"></div>
+        </div>
+        <div class="card side-card" style="margin-bottom:0;">
+          <h2>Resource Availability</h2>
+          <div class="resource-grid-mini" id="resAvail"></div>
+        </div>
+      </div>
+
+      <footer class="credits">MODB PLATFORM · MARITIME OPERATIONS INTELLIGENCE · ALL DATA SIMULATED FOR DEMONSTRATION</footer>
+    </div>
+
+    <!-- ===================== VESSEL BOARD PAGE ===================== -->
+    <div class="page" id="page-vesselboard">
+      <div class="page-head">
+        <div><h1>Vessel Board</h1><div class="sub">Live operational status across all berths and anchorage</div></div>
+        <div class="live-pill"><span class="live-dot"></span> LIVE TRACKING</div>
+      </div>
+      <div class="card" style="padding:18px 20px;">
+        <div class="toolbar">
+          <div class="filter-chips" id="vbFilters">
+            <button class="chip active" data-f="all">All</button>
+            <button class="chip" data-f="Arriving">Arriving</button>
+            <button class="chip" data-f="Berthed">Berthed</button>
+            <button class="chip" data-f="Loading">Loading/Discharging</button>
+            <button class="chip" data-f="Departed">Departed</button>
+            <button class="chip" data-f="Delayed">Delayed</button>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <input id="vbSearch" placeholder="Search vessel / IMO / voyage…" style="border:1px solid var(--border);border-radius:10px;padding:9px 12px;font-size:12.5px;outline:none;min-width:220px;">
+            <div class="view-toggle" id="vbView">
+              <button class="active" data-v="table">Table</button>
+              <button data-v="timeline">Timeline</button>
+            </div>
+          </div>
+        </div>
+        <div id="vbTableWrap">
+          <table>
+            <thead><tr>
+              <th>Vessel</th><th>Voyage</th><th>Line</th><th>IMO</th><th>Origin</th><th>Destination</th><th>ETA</th><th>ETD</th><th>Actual Arr.</th><th>Actual Dep.</th><th>Berth</th><th>Pilot</th><th>Tug</th><th>Cargo</th><th>Customs</th><th>Operation</th>
+            </tr></thead>
+            <tbody id="vbBody"></tbody>
+          </table>
+        </div>
+        <div id="vbTimelineWrap" style="display:none;">
+          <div class="tl-axis" id="vbTlAxis"></div>
+          <div id="vbTlBody"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== RESOURCES PAGE ===================== -->
+    <div class="page" id="page-resources">
+      <div class="page-head"><div><h1>Resource Management</h1><div class="sub">Berths, equipment, terminals and yard capacity</div></div></div>
+
+      <div class="section-label">Berth Layout &amp; Occupancy</div>
+      <div class="card" style="padding:20px;">
+        <div class="berth-grid" id="berthGrid"></div>
+      </div>
+
+      <div class="section-label">Equipment &amp; Fleet Utilization</div>
+      <div class="grid-2">
+        <div class="card res-list-card">
+          <h2>Cranes</h2>
+          <div id="craneList"></div>
+        </div>
+        <div class="card res-list-card">
+          <h2>Tug Boats &amp; Pilot Boats</h2>
+          <div id="tugList"></div>
+        </div>
+      </div>
+
+      <div class="section-label">Terminal Capacity</div>
+      <div class="grid-3">
+        <div class="card side-card" style="margin-bottom:0;">
+          <h2>Warehouses</h2>
+          <div id="warehouseList"></div>
+        </div>
+        <div class="card side-card" style="margin-bottom:0;">
+          <h2>Container Yard (TEU)</h2>
+          <div style="font-family:var(--font-display);font-size:22px;font-weight:600;">8,412 <small style="font-size:12px;color:var(--text-low);font-weight:400;">/ 11,000 TEU</small></div>
+          <div class="bar-track" style="margin-top:8px;"><div class="bar-fill" style="width:76%;background:var(--primary);"></div></div>
+          <div class="yard-grid" id="yardGrid"></div>
+        </div>
+        <div class="card side-card" style="margin-bottom:0;">
+          <h2>Passenger Terminal &amp; Equipment</h2>
+          <div style="font-family:var(--font-display);font-size:22px;font-weight:600;">642 <small style="font-size:12px;color:var(--text-low);font-weight:400;">/ 1,200 capacity</small></div>
+          <div class="bar-track" style="margin-top:8px;margin-bottom:14px;"><div class="bar-fill" style="width:53%;background:var(--accent);"></div></div>
+          <div id="equipmentList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== ANALYTICS PAGE ===================== -->
+    <div class="page" id="page-analytics">
+      <div class="page-head"><div><h1>Analytics</h1><div class="sub">Operational performance intelligence, port-wide</div></div></div>
+
+      <div class="card ai-panel" style="margin-bottom:22px;">
+        <div class="ai-head"><div class="ai-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2l1.8 5.5L19 9l-5.2 1.5L12 16l-1.8-5.5L5 9l5.2-1.5z"/></svg></div><h2>AI Insight Panel — Predictive Analytics</h2></div>
+        <div id="aiInsights"></div>
+      </div>
+
+      <div class="analytics-grid" id="analyticsGrid"></div>
+
+      <div class="section-label">Berth Occupancy Heatmap</div>
+      <div class="card" style="padding:20px;overflow-x:auto;">
+        <div class="heat-hours" id="heatHours"></div>
+        <div id="heatBody"></div>
+      </div>
+    </div>
+
+    <!-- ===================== EXECUTIVE PAGE ===================== -->
+    <div class="page" id="page-executive">
+      <div class="page-head"><div><h1>Executive Dashboard</h1><div class="sub">Strategic performance overview — Fiscal Month 7</div></div></div>
+
+      <div class="kpi-grid" id="execKpiGrid" style="grid-template-columns:repeat(3,1fr);"></div>
+
+      <div class="section-label">Monthly Performance</div>
+      <div class="card chart-card">
+        <h3>Revenue vs. Vessel Movement — Trailing 12 Months</h3>
+        <div class="sub">Composite index, normalized to base period</div>
+        <canvas id="execChart" height="90"></canvas>
+      </div>
+
+      <div class="section-label">Executive Summary</div>
+      <div class="card side-card" style="margin-bottom:0;">
+        <div id="execSummary" style="font-size:13px;line-height:1.8;color:var(--text-mid);"></div>
+      </div>
+    </div>
+
+    <!-- ===================== MESSAGES PAGE ===================== -->
+    <div class="page" id="page-messages">
+      <div class="page-head"><div><h1>Maritime Communication Center</h1><div class="sub">AIS, VTS, customs, pilot and system message stream</div></div></div>
+      <div class="msg-tabs" id="msgTabs">
+        <button class="chip active" data-t="all">All</button>
+        <button class="chip" data-t="AIS">AIS</button>
+        <button class="chip" data-t="VTS">VTS</button>
+        <button class="chip" data-t="Line">Shipping Line</button>
+        <button class="chip" data-t="Customs">Customs</button>
+        <button class="chip" data-t="Notification">Port Notification</button>
+        <button class="chip" data-t="Pilot">Pilot</button>
+        <button class="chip" data-t="Tug">Tug Assignment</button>
+        <button class="chip" data-t="System">System Event</button>
+      </div>
+      <div class="card" style="padding:8px 20px;">
+        <div class="msg-list" id="msgList"></div>
+      </div>
+    </div>
+
+    <!-- ===================== REPORTS PAGE ===================== -->
+    <div class="page" id="page-reports">
+      <div class="page-head"><div><h1>Reports</h1><div class="sub">Generate and export operational reports</div></div></div>
+      <div class="report-grid" id="reportGrid"></div>
+    </div>
+
+    <!-- ===================== SHIPPING LINES PAGE ===================== -->
+    <div class="page" id="page-shippinglines">
+      <div class="page-head"><div><h1>Shipping Lines</h1><div class="sub">Registered carriers operating in this port network</div></div></div>
+      <div class="dir-grid" id="shippingLinesGrid"></div>
+    </div>
+
+    <!-- ===================== VESSELS PAGE ===================== -->
+    <div class="page" id="page-vessels">
+      <div class="page-head"><div><h1>Vessel Registry</h1><div class="sub">Master data for all vessels calling this port network</div></div></div>
+      <div class="card table-card">
+        <table>
+          <thead><tr><th>Vessel</th><th>IMO</th><th>Type</th><th>Flag</th><th>GT</th><th>LOA (m)</th><th>Operator</th><th>Status</th></tr></thead>
+          <tbody id="vesselsRegistryBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===================== PORTS PAGE ===================== -->
+    <div class="page" id="page-ports">
+      <div class="page-head"><div><h1>Ports Network</h1><div class="sub">All ports monitored under this MODB instance</div></div></div>
+      <div class="dir-grid" id="portsGrid"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- AI ASSISTANT -->
+<button class="ai-fab" id="aiFab"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2l1.8 5.5L19 9l-5.2 1.5L12 16l-1.8-5.5L5 9l5.2-1.5z"/><circle cx="19" cy="19" r="2"/></svg></button>
+<div class="ai-panel-slide" id="aiSlide">
+  <div class="ai-slide-head">
+    <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2l1.8 5.5L19 9l-5.2 1.5L12 16l-1.8-5.5L5 9l5.2-1.5z"/></svg></span>MODB Copilot</h2>
+    <button class="ai-close" id="aiClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+  </div>
+  <div class="ai-quick" id="aiQuick"></div>
+  <div class="ai-chat" id="aiChat"></div>
+  <div class="ai-input-row">
+    <input id="aiInput" placeholder="Ask the copilot anything…">
+    <button id="aiSend"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg></button>
+  </div>
+</div>
+
+<div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span id="toastMsg"></span></div>
+
+<script>
+/* ============================================================
+   CLOCK
+   ============================================================ */
+function tickClock(){
+  const now = new Date();
+  document.getElementById('clockTime').textContent = now.toLocaleTimeString('en-GB');
+  document.getElementById('clockDate').textContent = now.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+}
+tickClock(); setInterval(tickClock,1000);
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+function showToast(msg){
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+/* ============================================================
+   NAV ROUTER
+   ============================================================ */
+document.querySelectorAll('.nav-item').forEach(item=>{
+  item.addEventListener('click', ()=>{
+    document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+    item.classList.add('active');
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById('page-'+item.dataset.page).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+});
+
+/* ============================================================
+   DATA LAYER
+   ============================================================ */
+const LINES = ["Pacific Star Line","Nordic Maritime","Trans-Ocean Lines","Blue Horizon Shipping","Meridian Container Line","Golden Gate Shipping","Archipelago Carriers"];
+const BERTH_NAMES = ["B1","B2","B3","B4","B5","B6","B7","B8","J1","J2","J3","J4"];
+const STATUSES = ["Arriving","Berthed","Loading","Discharging","Departed","Delayed"];
+const CARGO_STATUSES = ["Pending","Loading","Discharging","Completed"];
+const CUSTOMS_STATUSES = ["Cleared","In Review","Pending","Held"];
+
+function randChoice(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function pad(n){return n.toString().padStart(2,'0');}
+function fmtTime(h,m){return `${pad(Math.floor(h)%24)}:${pad(m)}`;}
+
+const VESSEL_NAMES = ["MV Ocean Pioneer","MV Nordic Star","MV Pacific Dawn","MV Coral Voyager","MV Meridian Glory","MV Andaman Queen","MV Java Horizon","MV Celebes Trader","MV Borneo Spirit","MV Sunda Navigator","MV Halcyon Wave","MV Archipelago Star","MV Kalimantan Express","MV Timor Current"];
+
+const VESSELS = VESSEL_NAMES.map((name,i)=>{
+  const status = STATUSES[i % STATUSES.length];
+  const etaH = (i*2)%24, etdH = (etaH + 6 + Math.floor(Math.random()*8))%24;
+  return {
+    name, voyage:`V${100+i}${randChoice(['N','S','E','W'])}`, line:LINES[i%LINES.length],
+    imo: (9200000+i*137).toString(),
+    origin: randChoice(["Singapore","Rotterdam","Shanghai","Busan","Colombo","Jebel Ali"]),
+    destination: randChoice(["Tanjung Priok","Tanjung Perak","Belawan","Makassar","Batam"]),
+    eta: fmtTime(etaH, (i*7)%60), etd: fmtTime(etdH,(i*11)%60),
+    actualArrival: status==="Arriving" ? "—" : fmtTime((etaH+1)%24,(i*5)%60),
+    actualDeparture: (status==="Departed") ? fmtTime((etdH+1)%24,(i*3)%60) : "—",
+    berth: status==="Arriving" ? "—" : BERTH_NAMES[i%BERTH_NAMES.length],
+    pilot: "Pilot "+(1+(i%6)), tug: status==="Arriving"?"—":"TB-0"+(1+(i%4)),
+    cargoStatus: CARGO_STATUSES[i%CARGO_STATUSES.length],
+    customsStatus: CUSTOMS_STATUSES[i%CUSTOMS_STATUSES.length],
+    opStatus: status,
+    startPct: (etaH/24)*100, durPct: (((etdH-etaH+24)%24 || 6)/24)*100
+  };
+});
+
+function statusBadgeClass(s){
+  if(s==="Berthed"||s==="Completed"||s==="Cleared") return "g";
+  if(s==="Arriving"||s==="Loading"||s==="Discharging"||s==="In Review") return "b";
+  if(s==="Delayed"||s==="Held") return "r";
+  if(s==="Departed") return "gray";
+  return "y";
+}
+function statusColor(s){
+  if(s==="Berthed"||s==="Completed"||s==="Cleared") return "#2A9D8F";
+  if(s==="Arriving"||s==="Loading"||s==="Discharging") return "#0077B6";
+  if(s==="Delayed") return "#E76F51";
+  if(s==="Departed") return "#9AA6B2";
+  return "#F4A261";
+}
+
+/* ============================================================
+   ICONS (for KPI cards)
+   ============================================================ */
+const ICONS = {
+  arrival:'<path d="M3 17l2-7h14l2 7"/><path d="M7 10V6h10v4"/><path d="M2 21c2 1 4 1 6 0s4-1 6 0 4 1 6 0"/>',
+  departure:'<path d="M13 5l7 7-7 7"/><path d="M4 12h16"/>',
+  cargo:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M3 12h18M9 7V5h6v2"/>',
+  berth:'<path d="M4 21V9l8-6 8 6v12"/><path d="M9 21v-6h6v6"/>',
+  passenger:'<circle cx="9" cy="8" r="3"/><path d="M2 21c0-3.5 3-6 7-6s7 2.5 7 6"/><circle cx="18" cy="9" r="2.3"/><path d="M15 21c.3-2.5 2-4.3 4-4.3s3.7 1.8 4 4.3"/>',
+  crane:'<path d="M4 21h9M6 21V9l10-5v6M16 10v11M11 10h9"/>',
+  occupancy:'<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 15h18"/>',
+  delay:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',
+  revenue:'<path d="M12 2v20M17 6H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>',
+  movement:'<path d="M3 17l2-7h14l2 7"/><path d="M7 10V6h10v4"/>',
+  volume:'<rect x="3" y="7" width="18" height="13" rx="2"/>',
+  turnaround:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',
+  utilization:'<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 3v18M16 3v18"/>',
+};
+
+const KPIS = [
+  {icon:'arrival', label:"Vessel Arrival (Today)", value:"11", unit:"vessels", delta:"+2 vs yesterday", up:true},
+  {icon:'departure', label:"Vessel Departure (Today)", value:"9", unit:"vessels", delta:"-1 vs yesterday", up:false},
+  {icon:'cargo', label:"Cargo Throughput", value:"48,120", unit:"tons", delta:"+6.2%", up:true},
+  {icon:'berth', label:"Active Berths", value:"9 / 12", unit:"occupied", delta:"75% utilization", up:true},
+  {icon:'passenger', label:"Passenger Count", value:"1,842", unit:"today", delta:"+11.4%", up:true},
+  {icon:'crane', label:"Crane Utilization", value:"81.3", unit:"%", delta:"+4.0%", up:true},
+  {icon:'occupancy', label:"Berth Occupancy", value:"75", unit:"%", delta:"-2.5%", up:false},
+  {icon:'delay', label:"Vessel Delay (avg)", value:"38", unit:"min", delta:"-9 min", up:true},
+];
+const kpiGrid = document.getElementById('kpiGrid');
+KPIS.forEach(k=>{
+  const el = document.createElement('div');
+  el.className='card kpi';
+  el.innerHTML = `
+    <div class="top"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${ICONS[k.icon]}</svg></div></div>
+    <div class="label">${k.label}</div>
+    <div class="value">${k.value}<small>${k.unit}</small></div>
+    <div class="delta ${k.up?'up':'down'}">${k.up?'▲':'▼'} ${k.delta}</div>
+  `;
+  kpiGrid.appendChild(el);
+});
+
+/* ============================================================
+   PORT MAP (SVG GIS)
+   ============================================================ */
+(function(){
+  const svg = document.getElementById('portMapSvg');
+  let html = '';
+  // sea background gradient
+  html += `<defs>
+    <linearGradient id="seaGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#E8F6FA"/><stop offset="1" stop-color="#D6EFF7"/>
+    </linearGradient>
+  </defs>`;
+  html += `<rect x="0" y="0" width="900" height="380" fill="url(#seaGrad)" rx="16"/>`;
+  // land / quay
+  html += `<path d="M0 260 Q150 230 300 250 Q450 265 600 245 Q750 230 900 250 L900 380 L0 380 Z" fill="#F1F5F8" stroke="#E5EEF5"/>`;
+  // quay line with berths
+  html += `<g id="layerBerths">`;
+  const berthCount = 10;
+  for(let i=0;i<berthCount;i++){
+    const x = 40 + i*82;
+    const occ = Math.random() > 0.35;
+    const col = occ ? (Math.random()>0.15 ? '#2A9D8F' : '#F4A261') : '#CBD9E3';
+    html += `<rect x="${x}" y="205" width="60" height="40" rx="4" fill="white" stroke="#E5EEF5"/>`;
+    html += `<rect x="${x}" y="205" width="60" height="6" fill="${col}"/>`;
+    html += `<text x="${x+30}" y="230" font-size="11" font-family="IBM Plex Mono" text-anchor="middle" fill="#6B7280">B${i+1}</text>`;
+  }
+  html += `</g>`;
+  // navigation channel
+  html += `<g id="layerChannel">
+    <path d="M450 205 C 460 140, 480 90, 520 40" stroke="#00B4D8" stroke-width="10" stroke-dasharray="2 10" fill="none" opacity="0.5" stroke-linecap="round"/>
+    <text x="530" y="40" font-size="10" font-family="IBM Plex Mono" fill="#00B4D8">Navigation Channel</text>
+  </g>`;
+  // anchorage area
+  html += `<ellipse cx="740" cy="90" rx="120" ry="55" fill="rgba(0,119,182,0.05)" stroke="#0077B6" stroke-dasharray="4 4" opacity="0.6"/>
+  <text x="740" y="90" font-size="10.5" font-family="IBM Plex Mono" text-anchor="middle" fill="#0077B6">Anchorage Area</text>`;
+  // wind layer
+  html += `<g id="layerWind" style="display:none;">`;
+  for(let i=0;i<6;i++){
+    const x = 620+i*40, y=140+((i%2)*20);
+    html += `<path d="M${x} ${y} l18 -8" stroke="#005B96" stroke-width="2" marker-end="url(#windArrow)"/>`;
+  }
+  html += `<marker id="windArrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#005B96"/></marker></g>`;
+  // vessels layer
+  html += `<g id="layerVessels">`;
+  const vesselPositions = [
+    {x:70,y:225,status:'g'},{x:152,y:225,status:'g'},{x:234,y:225,status:'y'},{x:398,y:225,status:'g'},
+    {x:480,y:225,status:'g'},{x:562,y:225,status:'g'},{x:644,y:225,status:'r'},
+    {x:600,y:130,status:'b'},{x:530,y:80,status:'b'},{x:700,y:70,status:'y'},{x:780,y:100,status:'y'},{x:820,y:60,status:'y'},
+  ];
+  const colMap = {g:'#2A9D8F', b:'#0077B6', y:'#F4A261', r:'#E76F51'};
+  vesselPositions.forEach((v,i)=>{
+    html += `<g class="vessel-dot"><circle cx="${v.x}" cy="${v.y}" r="6" fill="${colMap[v.status]}"><title>Vessel ${i+1}</title></circle>
+      <circle cx="${v.x}" cy="${v.y}" r="10" fill="none" stroke="${colMap[v.status]}" opacity="0.35"><animate attributeName="r" values="6;14;6" dur="2.4s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.5;0;0.5" dur="2.4s" repeatCount="indefinite"/></circle></g>`;
+  });
+  html += `</g>`;
+  svg.innerHTML = html;
+
+  document.getElementById('layerToggles').addEventListener('click', e=>{
+    if(e.target.tagName!=='BUTTON') return;
+    e.target.classList.toggle('active');
+    const layer = document.getElementById('layer'+e.target.dataset.l.charAt(0).toUpperCase()+e.target.dataset.l.slice(1));
+    if(layer) layer.style.display = e.target.classList.contains('active') ? '' : 'none';
+  });
+})();
+
+/* ============================================================
+   OPERATIONAL ALERTS
+   ============================================================ */
+const ALERTS = [
+  {sev:'crit', title:'Berth 7 congestion predicted (ETA overlap)', meta:'Berth Allocation · 18m ago'},
+  {sev:'warn', title:'MV Timor Current delayed 42 min', meta:'Vessel Board · 26m ago'},
+  {sev:'warn', title:'Tug TB-03 scheduled maintenance in 2h', meta:'Resources · 40m ago'},
+  {sev:'info', title:'Customs clearance pending — 3 vessels', meta:'Customs Desk · 1h ago'},
+  {sev:'crit', title:'High swell advisory — anchorage area', meta:'Weather Service · 1h 20m ago'},
+];
+const alertList = document.getElementById('alertList');
+ALERTS.forEach(a=>{
+  const el=document.createElement('div');
+  el.className='alert-item';
+  el.innerHTML=`<div class="alert-sev ${a.sev}"></div><div><div class="alert-title">${a.title}</div><div class="alert-meta">${a.meta}</div></div>`;
+  alertList.appendChild(el);
+});
+
+/* ============================================================
+   ETA/ETD TIMELINE (dashboard)
+   ============================================================ */
+function buildAxis(container){
+  container.innerHTML = '<span class="lbl"></span>' + Array.from({length:24},(_,i)=>`<span>${i}</span>`).join('');
+}
+function buildTimeline(container, vessels){
+  container.innerHTML='';
+  vessels.forEach(v=>{
+    const row = document.createElement('div');
+    row.className='tl-row';
+    row.innerHTML = `<div class="tl-name">${v.name}<small>${v.voyage} · ${v.berth}</small></div>
+      <div class="tl-track"><div class="tl-bar" style="left:${v.startPct}%;width:${Math.max(v.durPct,4)}%;background:${statusColor(v.opStatus)}">${v.opStatus}</div></div>`;
+    container.appendChild(row);
+  });
+}
+buildAxis(document.getElementById('tlAxis'));
+buildTimeline(document.getElementById('tlBody'), VESSELS.slice(0,8));
+
+/* ============================================================
+   TODAY'S SCHEDULE / CARGO SUMMARY / RESOURCE AVAILABILITY
+   ============================================================ */
+const SCHEDULE = [
+  {t:"06:20", label:"MV Ocean Pioneer — Arrival", sub:"Berth 1 · Pilot boarding", col:"#0077B6"},
+  {t:"07:45", label:"MV Nordic Star — Commence Loading", sub:"Berth 2 · Container ops", col:"#2A9D8F"},
+  {t:"09:10", label:"MV Pacific Dawn — Departure", sub:"Berth 3 · Tug TB-02 assigned", col:"#9AA6B2"},
+  {t:"11:30", label:"MV Coral Voyager — Bunkering", sub:"Anchorage · Fuel barge en route", col:"#F4A261"},
+  {t:"13:15", label:"MV Meridian Glory — Customs Inspection", sub:"Berth 5 · Held pending docs", col:"#E76F51"},
+  {t:"15:50", label:"MV Java Horizon — Arrival", sub:"Berth 6 · Pilot 4 assigned", col:"#0077B6"},
+];
+const scheduleList = document.getElementById('scheduleList');
+SCHEDULE.forEach(s=>{
+  const el=document.createElement('div');
+  el.className='sched-item';
+  el.innerHTML=`<div class="sched-time">${s.t}</div><div class="sched-dot" style="background:${s.col}"></div><div class="sched-body"><b>${s.label}</b><span>${s.sub}</span></div>`;
+  scheduleList.appendChild(el);
+});
+
+const CARGO = [
+  {label:"Containers (TEU)", val:6820, max:9000, col:"#0077B6"},
+  {label:"Bulk Cargo (tons)", val:18400, max:24000, col:"#00B4D8"},
+  {label:"Liquid Bulk (kL)", val:9200, max:14000, col:"#2A9D8F"},
+  {label:"General Cargo (tons)", val:5100, max:8000, col:"#F4A261"},
+];
+const cargoSummary = document.getElementById('cargoSummary');
+CARGO.forEach(c=>{
+  const pct = (c.val/c.max*100).toFixed(0);
+  const el=document.createElement('div');
+  el.className='cargo-bar-row';
+  el.innerHTML=`<div class="lbl"><span>${c.label}</span><b>${c.val.toLocaleString()}</b></div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${c.col}"></div></div>`;
+  cargoSummary.appendChild(el);
+});
+
+const RES_AVAIL = [
+  {n:"9/12", l:"Berths Available"},{n:"14/18", l:"Cranes Ready"},
+  {n:"6/8", l:"Tug Boats"},{n:"5/6", l:"Pilot Boats"},
+];
+const resAvail = document.getElementById('resAvail');
+RES_AVAIL.forEach(r=>{
+  const el=document.createElement('div');
+  el.className='resource-mini';
+  el.innerHTML=`<div class="n">${r.n}</div><div class="l">${r.l}</div>`;
+  resAvail.appendChild(el);
+});
+
+/* ============================================================
+   VESSEL BOARD
+   ============================================================ */
+const vbBody = document.getElementById('vbBody');
+function renderVesselBoard(filter, search){
+  vbBody.innerHTML='';
+  const term = (search||'').toLowerCase();
+  VESSELS.filter(v=>{
+    const matchFilter = filter==='all' || v.opStatus===filter || (filter==='Loading' && (v.opStatus==='Loading'||v.opStatus==='Discharging'));
+    const matchSearch = !term || v.name.toLowerCase().includes(term) || v.imo.includes(term) || v.voyage.toLowerCase().includes(term);
+    return matchFilter && matchSearch;
+  }).forEach(v=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="name">${v.name}</td><td>${v.voyage}</td><td>${v.line}</td><td>${v.imo}</td>
+      <td>${v.origin}</td><td>${v.destination}</td><td>${v.eta}</td><td>${v.etd}</td>
+      <td>${v.actualArrival}</td><td>${v.actualDeparture}</td><td>${v.berth}</td><td>${v.pilot}</td><td>${v.tug}</td>
+      <td><span class="badge ${statusBadgeClass(v.cargoStatus)}"><i></i>${v.cargoStatus}</span></td>
+      <td><span class="badge ${statusBadgeClass(v.customsStatus)}"><i></i>${v.customsStatus}</span></td>
+      <td><span class="badge ${statusBadgeClass(v.opStatus)}"><i></i>${v.opStatus}</span></td>
+    `;
+    vbBody.appendChild(tr);
+  });
+}
+renderVesselBoard('all','');
+document.getElementById('vbFilters').addEventListener('click', e=>{
+  if(e.target.tagName!=='BUTTON') return;
+  [...e.target.parentNode.children].forEach(b=>b.classList.remove('active'));
+  e.target.classList.add('active');
+  renderVesselBoard(e.target.dataset.f, document.getElementById('vbSearch').value);
+});
+document.getElementById('vbSearch').addEventListener('input', e=>{
+  const activeF = document.querySelector('#vbFilters .chip.active').dataset.f;
+  renderVesselBoard(activeF, e.target.value);
+});
+document.getElementById('vbView').addEventListener('click', e=>{
+  if(e.target.tagName!=='BUTTON') return;
+  [...e.target.parentNode.children].forEach(b=>b.classList.remove('active'));
+  e.target.classList.add('active');
+  const isTimeline = e.target.dataset.v==='timeline';
+  document.getElementById('vbTableWrap').style.display = isTimeline?'none':'block';
+  document.getElementById('vbTimelineWrap').style.display = isTimeline?'block':'none';
+  if(isTimeline){
+    buildAxis(document.getElementById('vbTlAxis'));
+    buildTimeline(document.getElementById('vbTlBody'), VESSELS);
+  }
+});
+
+/* ============================================================
+   RESOURCES PAGE
+   ============================================================ */
+const berthGrid = document.getElementById('berthGrid');
+BERTH_NAMES.forEach((b,i)=>{
+  const occ = Math.random()>0.3;
+  const status = occ ? (Math.random()>0.15?'Occupied':'Maintenance') : 'Available';
+  const col = status==='Occupied' ? '#2A9D8F' : status==='Maintenance' ? '#F4A261' : '#0077B6';
+  const el=document.createElement('div');
+  el.className='berth-cell';
+  el.style.borderTop = `3px solid ${col}`;
+  el.innerHTML=`<div class="bn">${b}</div><div class="bstatus" style="color:${col}">${status}</div><div class="bvessel">${occ?VESSEL_NAMES[i%VESSEL_NAMES.length]:'—'}</div>`;
+  berthGrid.appendChild(el);
+});
+
+const CRANES = Array.from({length:8},(_,i)=>({name:`STS Crane 0${i+1}`, util: Math.floor(50+Math.random()*48)}));
+const craneList = document.getElementById('craneList');
+CRANES.forEach(c=>{
+  const el=document.createElement('div');
+  el.className='res-row';
+  el.innerHTML=`<div class="rn">${c.name}</div><div class="rtrack"><div class="bar-track"><div class="bar-fill" style="width:${c.util}%;background:${c.util>85?'#F4A261':'#0077B6'}"></div></div></div><div class="rval">${c.util}%</div>`;
+  craneList.appendChild(el);
+});
+
+const TUGS = ["TB-01","TB-02","TB-03","TB-04","PB-01 (Pilot)","PB-02 (Pilot)"].map(n=>({name:n, status: randChoice(["Available","In Operation","In Operation","Maintenance"])}));
+const tugList = document.getElementById('tugList');
+TUGS.forEach(t=>{
+  const col = t.status==='Available' ? '#2A9D8F' : t.status==='Maintenance' ? '#F4A261' : '#0077B6';
+  const el=document.createElement('div');
+  el.className='res-row';
+  el.innerHTML=`<div class="rn">${t.name}</div><div class="rtrack"><div class="bar-track"><div class="bar-fill" style="width:${t.status==='Available'?20:t.status==='Maintenance'?100:70}%;background:${col}"></div></div></div><div class="rval" style="color:${col}">${t.status}</div>`;
+  tugList.appendChild(el);
+});
+
+const WAREHOUSES = [{n:"Warehouse A — General",p:64},{n:"Warehouse B — Cold Chain",p:81},{n:"Warehouse C — Bonded",p:47},{n:"Warehouse D — Bulk",p:92}];
+const warehouseList = document.getElementById('warehouseList');
+WAREHOUSES.forEach(w=>{
+  const el=document.createElement('div');
+  el.className='res-row';
+  el.innerHTML=`<div class="rn" style="width:150px;">${w.n}</div><div class="rtrack"><div class="bar-track"><div class="bar-fill" style="width:${w.p}%;background:${w.p>85?'#F4A261':'#00B4D8'}"></div></div></div><div class="rval">${w.p}%</div>`;
+  warehouseList.appendChild(el);
+});
+
+const yardGrid = document.getElementById('yardGrid');
+for(let i=0;i<60;i++){
+  const filled = i < 46;
+  const cell=document.createElement('div');
+  cell.className='yard-cell';
+  cell.style.background = filled ? (Math.random()>0.85?'#F4A261':'#0077B6') : '#E5EEF5';
+  yardGrid.appendChild(cell);
+}
+
+const EQUIPMENT = ["Reach Stacker RS-01: Operational","Reach Stacker RS-02: Operational","Forklift FL-05: Maintenance","Gantry Crane RTG-03: Operational","Terminal Tractor TT-11: Operational"];
+const equipmentList = document.getElementById('equipmentList');
+EQUIPMENT.forEach(e=>{
+  const [name,status]=e.split(': ');
+  const col = status==='Operational' ? '#2A9D8F' : '#F4A261';
+  const el=document.createElement('div');
+  el.className='res-row';
+  el.innerHTML=`<div class="rn" style="width:170px;">${name}</div><div class="rtrack"></div><div class="rval" style="color:${col}">${status}</div>`;
+  equipmentList.appendChild(el);
+});
+
+/* ============================================================
+   ANALYTICS PAGE
+   ============================================================ */
+const AI_INSIGHTS = [
+  {b:"Congestion predicted at Berth 7", s:"Overlapping ETAs for 2 vessels within a 90-minute window — recommend reallocating MV Java Horizon to Berth 9."},
+  {b:"Average waiting time trending down", s:"Fleet-wide waiting time improved 12% week-over-week following revised pilot scheduling."},
+  {b:"Tug fleet efficiency opportunity", s:"TB-03 and TB-04 show 22% idle time during peak hours — consider shift rebalancing."},
+  {b:"Customs clearance bottleneck", s:"3 vessels pending documentation review for over 4 hours — flagged for priority processing."},
+];
+const aiInsights = document.getElementById('aiInsights');
+AI_INSIGHTS.forEach(a=>{
+  const el=document.createElement('div');
+  el.className='ai-insight';
+  el.innerHTML=`<div class="aidot"></div><div><b>${a.b}</b><span>${a.s}</span></div>`;
+  aiInsights.appendChild(el);
+});
+
+function genSeries(n, base, amp, noise){
+  const arr=[];
+  for(let i=0;i<n;i++) arr.push(Math.max(0, base + Math.sin((i/n)*Math.PI*2 - Math.PI/2)*amp + (Math.random()-0.5)*noise));
+  return arr;
+}
+const analyticsGrid = document.getElementById('analyticsGrid');
+const chartsConfig = [
+  {title:"Vessel Traffic", sub:"Arrivals & departures per hour, 24h", type:'line', labels:Array.from({length:24},(_,i)=>i), datasets:[
+    {label:'Arrivals', data:genSeries(24,4,3,1.5), borderColor:'#0077B6', backgroundColor:'rgba(0,119,182,0.1)', fill:true, tension:0.4, pointRadius:0, borderWidth:2},
+    {label:'Departures', data:genSeries(24,3.5,3,1.5), borderColor:'#00B4D8', backgroundColor:'transparent', tension:0.4, pointRadius:0, borderWidth:2}
+  ]},
+  {title:"Cargo Throughput", sub:"Tons by category, last 7 days", type:'bar', labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], datasets:[
+    {label:'Containers', data:genSeries(7,4000,900,300), backgroundColor:'#0077B6'},
+    {label:'Bulk', data:genSeries(7,2500,600,200), backgroundColor:'#00B4D8'},
+    {label:'Liquid', data:genSeries(7,1400,400,150), backgroundColor:'#2A9D8F'}
+  ], stacked:true},
+  {title:"Berth Utilization", sub:"Occupied hours by berth, today", type:'bar', labels:BERTH_NAMES.slice(0,8), datasets:[
+    {label:'Utilization %', data:BERTH_NAMES.slice(0,8).map(()=>Math.floor(50+Math.random()*45)), backgroundColor:'#005B96'}
+  ], horizontal:true},
+  {title:"Delay Trend", sub:"Average vessel delay, minutes — 14 days", type:'line', labels:Array.from({length:14},(_,i)=>'D'+(i+1)), datasets:[
+    {label:'Avg Delay (min)', data:genSeries(14,45,20,10), borderColor:'#E76F51', backgroundColor:'rgba(231,111,81,0.08)', fill:true, tension:0.4, pointRadius:0, borderWidth:2}
+  ]},
+  {title:"Peak Hour Analysis", sub:"Vessel operations by hour of day", type:'bar', labels:Array.from({length:24},(_,i)=>i), datasets:[
+    {label:'Operations', data:genSeries(24,6,5,2), backgroundColor:'#00B4D8'}
+  ]},
+  {title:"Waiting Time", sub:"Minutes at anchorage before berth, 14 days", type:'line', labels:Array.from({length:14},(_,i)=>'D'+(i+1)), datasets:[
+    {label:'Waiting Time', data:genSeries(14,90,30,15), borderColor:'#2A9D8F', backgroundColor:'transparent', tension:0.4, pointRadius:0, borderWidth:2}
+  ]},
+  {title:"Resource Efficiency", sub:"Utilization index across resource classes", type:'radar', labels:['Berths','Cranes','Tugs','Pilots','Warehouses','Yard'], datasets:[
+    {label:'Efficiency', data:[75,81,68,72,79,86], backgroundColor:'rgba(0,180,216,0.15)', borderColor:'#00B4D8', pointBackgroundColor:'#00B4D8'}
+  ]},
+];
+chartsConfig.forEach((cfg,idx)=>{
+  const el=document.createElement('div');
+  el.className='card chart-card';
+  const cid = 'chart'+idx;
+  el.innerHTML = `<h3>${cfg.title}</h3><div class="sub">${cfg.sub}</div><canvas id="${cid}" height="${cfg.type==='radar'?200:95}"></canvas>`;
+  analyticsGrid.appendChild(el);
+  const opts = {
+    responsive:true, maintainAspectRatio:true, indexAxis: cfg.horizontal?'y':'x',
+    plugins:{legend:{display:cfg.datasets.length>1, position:'bottom', labels:{boxWidth:10,font:{size:10.5}}}},
+    scales: cfg.type==='radar' ? {r:{grid:{color:'#E5EEF5'},angleLines:{color:'#E5EEF5'},pointLabels:{font:{size:10.5}},ticks:{display:false}}} : {
+      x:{stacked:!!cfg.stacked, grid:{color:'#F1F5F8'}, ticks:{font:{family:'IBM Plex Mono',size:9.5},color:'#9AA6B2', maxTicksLimit:10}},
+      y:{stacked:!!cfg.stacked, grid:{color:'#F1F5F8'}, ticks:{font:{family:'IBM Plex Mono',size:9.5},color:'#9AA6B2'}}
+    }
+  };
+  requestAnimationFrame(()=>{
+    new Chart(document.getElementById(cid).getContext('2d'), {type:cfg.type, data:{labels:cfg.labels, datasets:cfg.datasets}, options:opts});
+  });
+});
+
+/* heatmap */
+const heatHours = document.getElementById('heatHours');
+heatHours.innerHTML = '<span></span>' + Array.from({length:24},(_,i)=>`<span>${i}</span>`).join('');
+const heatBody = document.getElementById('heatBody');
+BERTH_NAMES.forEach(b=>{
+  const row=document.createElement('div'); row.className='heat-row';
+  let cells = `<div class="lbl">${b}</div>`;
+  for(let h=0;h<24;h++){
+    const val = Math.max(0.05, Math.min(1, 0.3+Math.sin((h-8)/12*Math.PI)*0.5+(Math.random()-0.5)*0.15));
+    const lo=[241,245,248], hi=[0,119,182];
+    const r=Math.round(lo[0]+(hi[0]-lo[0])*val), g=Math.round(lo[1]+(hi[1]-lo[1])*val), bl=Math.round(lo[2]+(hi[2]-lo[2])*val);
+    cells += `<div class="heat-cell" style="background:rgb(${r},${g},${bl})" title="${b} @ ${h}:00"></div>`;
+  }
+  row.innerHTML = cells;
+  heatBody.appendChild(row);
+});
+
+/* ============================================================
+   EXECUTIVE PAGE
+   ============================================================ */
+const EXEC_KPIS = [
+  {icon:'revenue', label:"Port Revenue (MTD)", value:"Rp 84.6", unit:"Billion", delta:"+7.8%", up:true},
+  {icon:'movement', label:"Vessel Movement", value:"312", unit:"calls", delta:"+4.1%", up:true},
+  {icon:'volume', label:"Cargo Volume", value:"1.42M", unit:"tons", delta:"+5.6%", up:true},
+  {icon:'passenger', label:"Passenger Volume", value:"48,210", unit:"pax", delta:"+9.2%", up:true},
+  {icon:'turnaround', label:"Avg Turnaround Time", value:"14.2", unit:"hours", delta:"-1.1h", up:true},
+  {icon:'utilization', label:"Port Utilization", value:"78.4", unit:"%", delta:"+3.0%", up:true},
+];
+const execKpiGrid = document.getElementById('execKpiGrid');
+EXEC_KPIS.forEach(k=>{
+  const el=document.createElement('div');
+  el.className='card kpi';
+  el.innerHTML=`
+    <div class="top"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${ICONS[k.icon]}</svg></div></div>
+    <div class="label">${k.label}</div><div class="value">${k.value}<small>${k.unit}</small></div>
+    <div class="delta ${k.up?'up':'down'}">${k.up?'▲':'▼'} ${k.delta}</div>`;
+  execKpiGrid.appendChild(el);
+});
+
+const months = ['Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul'];
+requestAnimationFrame(()=>{
+  new Chart(document.getElementById('execChart').getContext('2d'), {
+    data:{labels:months, datasets:[
+      {type:'bar', label:'Revenue Index', data:genSeries(12,85,20,8), backgroundColor:'#00B4D8', order:2},
+      {type:'line', label:'Vessel Movement Index', data:genSeries(12,80,15,6), borderColor:'#005B96', backgroundColor:'transparent', tension:0.4, pointRadius:3, pointBackgroundColor:'#005B96', borderWidth:2, order:1}
+    ]},
+    options:{responsive:true, plugins:{legend:{position:'bottom', labels:{boxWidth:10,font:{size:11}}}},
+      scales:{x:{grid:{display:false}, ticks:{font:{family:'IBM Plex Mono',size:10.5},color:'#9AA6B2'}}, y:{grid:{color:'#F1F5F8'}, ticks:{font:{family:'IBM Plex Mono',size:10.5},color:'#9AA6B2'}}}}
+  });
+});
+
+document.getElementById('execSummary').innerHTML = `
+  <p>Port network performance for Fiscal Month 7 remains ahead of target, with <b style="color:var(--text-hi)">vessel movement up 4.1%</b> and cargo volume reaching <b style="color:var(--text-hi)">1.42 million tons</b>, driven primarily by increased containerized traffic at Tanjung Priok and Tanjung Perak.</p>
+  <p>Average turnaround time improved to <b style="color:var(--text-hi)">14.2 hours</b>, a reduction of 1.1 hours from the prior period, reflecting the impact of revised berth allocation protocols and expanded tug availability during peak windows.</p>
+  <p>Port utilization stands at <b style="color:var(--text-hi)">78.4%</b> fleet-wide. Continued investment in crane automation and yard optimization is recommended to sustain throughput growth into the next fiscal quarter.</p>
+`;
+
+/* ============================================================
+   MESSAGES PAGE
+   ============================================================ */
+const MESSAGES = [
+  {src:"AIS", title:"Position report received — MV Ocean Pioneer", meta:"Lat -6.10, Lng 106.88 · SOG 8.2kt", t:"14:32:08", parse:"g", valid:"g", pri:"Low"},
+  {src:"VTS", title:"Traffic advisory — channel congestion, sector 3", meta:"Vessel Traffic Service", t:"14:28:41", parse:"g", valid:"g", pri:"Medium"},
+  {src:"Line", title:"Voyage schedule update — V104N", meta:"Nordic Maritime", t:"14:20:15", parse:"g", valid:"y", pri:"Medium"},
+  {src:"Customs", title:"Clearance held — documentation incomplete", meta:"MV Meridian Glory", t:"14:05:52", parse:"g", valid:"r", pri:"High"},
+  {src:"Notification", title:"Berth 4 maintenance window scheduled", meta:"Port Authority Notice", t:"13:58:03", parse:"g", valid:"g", pri:"Low"},
+  {src:"Pilot", title:"Pilot boarding confirmed — MV Java Horizon", meta:"Pilot Station Alpha", t:"13:44:19", parse:"g", valid:"g", pri:"Medium"},
+  {src:"Tug", title:"Tug assignment updated — TB-02 reassigned", meta:"Berth 3 operation", t:"13:30:02", parse:"g", valid:"g", pri:"Medium"},
+  {src:"System", title:"Radar feed reconnected — Sector 2", meta:"System Health Monitor", t:"13:12:47", parse:"y", valid:"g", pri:"Low"},
+  {src:"AIS", title:"Static data update — MV Coral Voyager", meta:"IMO 9200962", t:"12:55:30", parse:"g", valid:"g", pri:"Low"},
+  {src:"Customs", title:"Clearance approved — MV Pacific Dawn", meta:"Customs Desk 2", t:"12:40:11", parse:"g", valid:"g", pri:"Low"},
+];
+const msgList = document.getElementById('msgList');
+function srcType(s){ if(s==="Line") return "Line"; if(s==="Notification") return "Notification"; return s; }
+function renderMessages(tab){
+  msgList.innerHTML='';
+  MESSAGES.filter(m=>tab==='all' || srcType(m.src)===tab).forEach(m=>{
+    const el=document.createElement('div');
+    el.className='msg-item';
+    el.innerHTML=`
+      <div class="msg-source">${m.src}</div>
+      <div class="msg-body"><b>${m.title}</b><span>${m.meta}</span></div>
+      <div><span class="badge ${m.parse==='g'?'g':'y'}"><i></i>Parsed ${m.parse==='g'?'OK':'Warn'}</span></div>
+      <div><span class="badge ${m.valid==='g'?'g':m.valid==='y'?'y':'r'}"><i></i>${m.valid==='g'?'Valid':m.valid==='y'?'Review':'Invalid'}</span></div>
+      <div class="msg-time">${m.t}</div>
+    `;
+    msgList.appendChild(el);
+  });
+}
+renderMessages('all');
+document.getElementById('msgTabs').addEventListener('click', e=>{
+  if(e.target.tagName!=='BUTTON') return;
+  [...e.target.parentNode.children].forEach(b=>b.classList.remove('active'));
+  e.target.classList.add('active');
+  renderMessages(e.target.dataset.t);
+});
+
+/* ============================================================
+   REPORTS PAGE
+   ============================================================ */
+const REPORTS = [
+  {title:"Vessel Movement Report", desc:"Complete log of vessel arrivals, departures and voyage records for the selected period.", icon:'movement', csv:true},
+  {title:"Berthing Report", desc:"Berth allocation history, occupancy duration and utilization by berth.", icon:'berth', csv:true},
+  {title:"Cargo Report", desc:"Cargo throughput broken down by category, vessel and terminal.", icon:'cargo', csv:true},
+  {title:"Passenger Report", desc:"Passenger terminal traffic, embarkation and disembarkation counts.", icon:'passenger', csv:false},
+  {title:"Resource Utilization Report", desc:"Crane, tug, pilot boat and berth utilization summary.", icon:'crane', csv:false},
+  {title:"KPI Report", desc:"Consolidated operational KPI performance vs. targets.", icon:'occupancy', csv:false},
+  {title:"Audit Log", desc:"Full system audit trail of operator actions and data changes.", icon:'delay', csv:false},
+];
+const reportGrid = document.getElementById('reportGrid');
+function downloadCSV(filename, rows){
+  const csv = rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+REPORTS.forEach(r=>{
+  const el=document.createElement('div');
+  el.className='card report-card';
+  el.innerHTML=`
+    <div class="ric"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${ICONS[r.icon]}</svg></div>
+    <h3>${r.title}</h3><p>${r.desc}</p>
+    <div class="export-row">
+      <button class="export-btn" data-fmt="PDF">PDF</button>
+      <button class="export-btn" data-fmt="Excel">Excel</button>
+      <button class="export-btn" data-fmt="CSV">CSV</button>
+    </div>
+  `;
+  el.querySelectorAll('.export-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(btn.dataset.fmt==='CSV' && r.csv){
+        const rows = [["Vessel","Voyage","Line","IMO","Origin","Destination","ETA","ETD","Berth","Status"]];
+        VESSELS.forEach(v=>rows.push([v.name,v.voyage,v.line,v.imo,v.origin,v.destination,v.eta,v.etd,v.berth,v.opStatus]));
+        downloadCSV(r.title.replace(/\\s+/g,'_')+'.csv', rows);
+        showToast(`${r.title} exported as CSV`);
+      } else {
+        showToast(`Generating ${r.title} as ${btn.dataset.fmt}…`);
+      }
+    });
+  });
+  reportGrid.appendChild(el);
+});
+
+/* ============================================================
+   SHIPPING LINES PAGE
+   ============================================================ */
+const shippingLinesGrid = document.getElementById('shippingLinesGrid');
+LINES.forEach(line=>{
+  const count = VESSELS.filter(v=>v.line===line).length;
+  const initials = line.split(' ').map(w=>w[0]).slice(0,2).join('');
+  const el=document.createElement('div');
+  el.className='card dir-card';
+  el.innerHTML=`
+    <div class="dir-top"><div class="dir-logo">${initials}</div><div><b>${line}</b><span>Container &amp; General Cargo Carrier</span></div></div>
+    <div class="dir-stats">
+      <div>Active Vessels<b>${count || 1}</b></div>
+      <div>Active Voyages<b>${Math.max(1,count)}</b></div>
+      <div>On-Time %<b>${(88+Math.random()*10).toFixed(1)}%</b></div>
+      <div>Port Calls (30d)<b>${8+Math.floor(Math.random()*20)}</b></div>
+    </div>
+  `;
+  shippingLinesGrid.appendChild(el);
+});
+
+/* ============================================================
+   VESSELS REGISTRY PAGE
+   ============================================================ */
+const vesselsRegistryBody = document.getElementById('vesselsRegistryBody');
+const TYPES = ["Container","Bulk Carrier","Tanker","RoRo","General Cargo"];
+const FLAGS = ["Panama","Liberia","Marshall Islands","Singapore","Indonesia"];
+VESSELS.forEach((v,i)=>{
+  const tr=document.createElement('tr');
+  tr.innerHTML=`
+    <td class="name">${v.name}</td><td>${v.imo}</td><td>${TYPES[i%TYPES.length]}</td><td>${FLAGS[i%FLAGS.length]}</td>
+    <td>${(18000+i*1500).toLocaleString()}</td><td>${(180+i*4)}</td><td>${v.line}</td>
+    <td><span class="badge ${statusBadgeClass(v.opStatus)}"><i></i>${v.opStatus}</span></td>
+  `;
+  vesselsRegistryBody.appendChild(tr);
+});
+
+/* ============================================================
+   PORTS PAGE
+   ============================================================ */
+const PORTS = [
+  {name:"Tanjung Priok", region:"Jakarta", berths:12, vessels:9, util:75},
+  {name:"Tanjung Perak", region:"Surabaya", berths:10, vessels:7, util:68},
+  {name:"Belawan", region:"Medan", berths:8, vessels:5, util:58},
+  {name:"Makassar", region:"South Sulawesi", berths:6, vessels:4, util:64},
+  {name:"Batam", region:"Riau Islands", berths:7, vessels:6, util:71},
+];
+const portsGrid = document.getElementById('portsGrid');
+PORTS.forEach(p=>{
+  const el=document.createElement('div');
+  el.className='card dir-card';
+  el.innerHTML=`
+    <div class="dir-top"><div class="dir-logo"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="white" stroke-width="2"><path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z"/></svg></div><div><b>${p.name}</b><span>${p.region}</span></div></div>
+    <div class="dir-stats">
+      <div>Berths<b>${p.berths}</b></div>
+      <div>Vessels Now<b>${p.vessels}</b></div>
+      <div>Utilization<b>${p.util}%</b></div>
+      <div>Status<b style="color:var(--success)">Operational</b></div>
+    </div>
+  `;
+  portsGrid.appendChild(el);
+});
+
+/* ============================================================
+   AI ASSISTANT
+   ============================================================ */
+const aiFab = document.getElementById('aiFab'), aiSlide = document.getElementById('aiSlide'), aiChat = document.getElementById('aiChat');
+aiFab.addEventListener('click', ()=>aiSlide.classList.add('open'));
+document.getElementById('aiClose').addEventListener('click', ()=>aiSlide.classList.remove('open'));
+
+const QUICK_ACTIONS = [
+  "Predict ETA", "Predict Berth Availability", "Detect Congestion", "Recommend Berth Allocation",
+  "Recommend Tug Assignment", "Detect Operational Anomalies", "Summarize Daily Operations", "Natural Language Search"
+];
+const aiQuick = document.getElementById('aiQuick');
+QUICK_ACTIONS.forEach(q=>{
+  const btn=document.createElement('button');
+  btn.textContent=q;
+  btn.addEventListener('click', ()=>runAI(q));
+  aiQuick.appendChild(btn);
+});
+
+function addChatMsg(role, text){
+  const el=document.createElement('div');
+  el.className='ai-msg '+role;
+  el.textContent=text;
+  aiChat.appendChild(el);
+  aiChat.scrollTop = aiChat.scrollHeight;
+}
+addChatMsg('bot', "Hello Sari — I'm the MODB Copilot. Ask me about ETAs, berth allocation, congestion, or daily operations, or use a quick action below.");
+
+function runAI(query){
+  addChatMsg('user', query);
+  let response = "";
+  const v = randChoice(VESSELS);
+  if(query.includes("Predict ETA")){
+    response = `Based on current AIS speed and heading, ${v.name} (${v.voyage}) is predicted to arrive at ${v.eta} ± 18 minutes, with 94% confidence.`;
+  } else if(query.includes("Berth Availability")){
+    response = `Berth 4 and Berth 9 are forecast to become available within the next 3 hours. Recommend holding Berth 9 for the next scheduled arrival.`;
+  } else if(query.includes("Congestion")){
+    response = `Congestion risk detected at Berth 7 between 15:30–17:00 due to overlapping ETAs of 2 vessels. Recommend rerouting one vessel to Berth 9.`;
+  } else if(query.includes("Berth Allocation")){
+    response = `Recommended allocation: assign ${v.name} to Berth 5 based on draft compatibility, cargo type, and current occupancy schedule.`;
+  } else if(query.includes("Tug Assignment")){
+    response = `TB-02 is closest and available — recommend assigning to ${v.name} for berthing assistance at ${v.berth}.`;
+  } else if(query.includes("Anomalies")){
+    response = `Anomaly detected: MV Timor Current has not transmitted an AIS update in 42 minutes, exceeding the 30-minute threshold. Flagged for VTS follow-up.`;
+  } else if(query.includes("Summarize Daily Operations")){
+    response = `Today: 11 arrivals, 9 departures, 75% berth occupancy, average delay 38 minutes. Two operational alerts remain open — Berth 7 congestion and a customs hold.`;
+  } else if(query.includes("Natural Language Search")){
+    response = `Try asking something like: "Which vessels are delayed today?" or "Show me berths above 90% utilization."`;
+  } else {
+    response = `Here's what I found regarding "${query}": all systems nominal, no critical anomalies detected in the current shift.`;
+  }
+  setTimeout(()=>addChatMsg('bot', response), 400);
+}
+document.getElementById('aiSend').addEventListener('click', ()=>{
+  const input = document.getElementById('aiInput');
+  if(!input.value.trim()) return;
+  runAI(input.value.trim());
+  input.value='';
+});
+document.getElementById('aiInput').addEventListener('keydown', e=>{
+  if(e.key==='Enter'){ document.getElementById('aiSend').click(); }
+});
+</script>
+</body>
+</html>
