@@ -1,0 +1,61 @@
+/* =========================================================================
+   PODB · Port Operation Dashboard
+   base.css — design token, reset, dan aturan tipografi dasar.
+   Dimuat PERTAMA.
+   ========================================================================= */
+
+:root{
+  /* warna */
+  --bg:#F7FAFC;
+  --card:#FFFFFF;
+  --border:#E5EEF5;
+  --primary:#0077B6;
+  --secondary:#005B96;
+  --accent:#00B4D8;
+  --success:#2A9D8F;
+  --warning:#F4A261;
+  --danger:#E76F51;
+  --text-hi:#1F2937;
+  --text-mid:#6B7280;
+  --text-low:#9AA6B2;
+
+  /* satu keluarga font untuk seluruh antarmuka */
+  --font-sans:'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* radius */
+  --r-lg:16px;
+  --r-md:12px;
+  --r-sm:8px;
+
+  /* bayangan */
+  --shadow-1:0 1px 2px rgba(16,40,64,0.05);
+  --shadow-2:0 6px 20px -8px rgba(16,40,64,0.12);
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+
+body{
+  background:var(--bg);
+  color:var(--text-hi);
+  font-family:var(--font-sans);
+  font-weight:400;
+  -webkit-font-smoothing:antialiased;
+}
+
+button,input,select{font-family:inherit;}
+button{cursor:pointer;}
+
+/* Angka & label teknis memakai lebar digit seragam supaya kolom tabel,
+   timeline dan KPI tetap rata saat nilainya berubah. */
+.num,td,th,.clock,.alert-meta,.tl-bar,.tl-name small,.sched-time,.msg-time,
+.map-legend,.nav-group-label,.section-label,.heat-row .lbl,.heat-hours span,
+.berth-cell .bstatus,.res-row .rval,.dir-stats b,.kpi .delta,.live-pill,
+.tl-axis span,footer.credits{
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:'tnum' 1;
+}
+
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-thumb{background:#CBD9E3;border-radius:8px;}
+::-webkit-scrollbar-track{background:transparent;}

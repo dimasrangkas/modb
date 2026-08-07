@@ -1,0 +1,59 @@
+/* =========================================================================
+   PODB · Port Operation Dashboard
+   responsive.css — seluruh breakpoint.
+
+   PENTING: berkas ini harus dimuat TERAKHIR. Aturan di sini memakai selector
+   dengan specificity yang sama seperti di layout.css/components.css, sehingga
+   yang menentukan pemenang cascade adalah urutan pemuatan — bukan media query.
+   ========================================================================= */
+
+/* Layar lebar sedang: KPI 4 → 2 kolom, dermaga 6 → 3 kolom */
+@media (max-width:1500px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr);}
+  .berth-grid{grid-template-columns:repeat(3,1fr);}
+}
+
+/* Laptop kecil: grid dua/tiga kolom ditumpuk */
+@media (max-width:1400px){
+  .grid-2,.grid-3,.analytics-grid{grid-template-columns:1fr;}
+  .report-grid,.dir-grid{grid-template-columns:1fr 1fr;}
+}
+
+/* Topbar mulai sesak: sembunyikan pencarian dan chip cuaca */
+@media (max-width:1240px){
+  .top-mid{display:none;}
+  .weather-chip{display:none;}
+}
+
+/* Tablet: sidebar menjadi strip navigasi horizontal di bawah topbar */
+@media (max-width:1024px){
+  .app{grid-template-columns:1fr;grid-template-rows:64px auto 1fr;}
+  .topbar{grid-column:1;}
+
+  .sidebar{
+    grid-column:1;grid-row:2;
+    position:static;height:auto;
+    display:flex;gap:6px;overflow-x:auto;
+    border-right:none;border-bottom:1px solid var(--border);
+    padding:10px 12px;
+  }
+  .sidebar .nav-group-label{display:none;}
+  .nav-item{width:auto;white-space:nowrap;margin-bottom:0;}
+
+  .main{grid-column:1;grid-row:3;padding:18px 16px 50px;}
+
+  .clock,.who{display:none;}
+
+  .msg-item{grid-template-columns:1fr;gap:6px;}
+  .msg-time{text-align:left;}
+
+  .report-grid,.dir-grid,.kpi-grid,.berth-grid{grid-template-columns:1fr 1fr;}
+  .heat-hours,.heat-row{grid-template-columns:80px repeat(24,1fr);}
+}
+
+/* Ponsel: semua kartu satu kolom, panel copilot layar penuh */
+@media (max-width:640px){
+  .report-grid,.dir-grid,.kpi-grid,.berth-grid{grid-template-columns:1fr;}
+  .brand-inst{display:none;}
+  .ai-slide{width:100vw;right:-100vw;}
+}

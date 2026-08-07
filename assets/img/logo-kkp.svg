@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Lambang Kementerian Kelautan dan Perikanan Republik Indonesia.
+
+  CATATAN: ini adalah render SVG BERGAYA (stylized), bukan reproduksi persis
+  lambang resmi. Untuk memakai lambang resmi, cukup timpa berkas ini dengan
+  file resmi (SVG atau PNG) tanpa mengubah kode lain — index.html hanya
+  merujuk ke assets/img/logo-kkp.svg.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64"
+     role="img" aria-label="Lambang Kementerian Kelautan dan Perikanan Republik Indonesia">
+  <defs>
+    <linearGradient id="kkpSea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0090C8"/>
+      <stop offset="1" stop-color="#004E86"/>
+    </linearGradient>
+  </defs>
+
+  <!-- cakram laut -->
+  <circle cx="32" cy="32" r="30" fill="url(#kkpSea)"/>
+  <circle cx="32" cy="32" r="30" fill="none" stroke="#003A66" stroke-width="2"/>
+  <circle cx="32" cy="32" r="25.5" fill="none" stroke="#FFFFFF" stroke-width="1.2" opacity=".55"/>
+
+  <!-- bintang -->
+  <path d="M32 9.5l1.9 4.1 4.5.5-3.4 3 1 4.4-4-2.3-4 2.3 1-4.4-3.4-3 4.5-.5z" fill="#F5C048"/>
+
+  <!-- ikan -->
+  <path d="M22 33.5c4-6.4 12.6-9 19.4-5.9l3.9-3.2-1 5.1c1.6 1.4 2.7 3 3.2 4.6-1.6 1.7-3.6 3-5.9 3.8l.3 5-4-3.3c-6.4 1.4-12.9-1-15.9-6.1z" fill="#FFFFFF"/>
+  <circle cx="39.6" cy="31.4" r="1.5" fill="#004E86"/>
+
+  <!-- gelombang -->
+  <path d="M12 45c4 0 4 2.6 8 2.6s4-2.6 8-2.6 4 2.6 8 2.6 4-2.6 8-2.6 4 2.6 8 2.6"
+        fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" opacity=".95"/>
+  <path d="M14 51.5c3.4 0 3.4 2.2 6.8 2.2s3.4-2.2 6.8-2.2 3.4 2.2 6.8 2.2 3.4-2.2 6.8-2.2 3.4 2.2 6.8 2.2"
+        fill="none" stroke="#7FD4EF" stroke-width="2" stroke-linecap="round" opacity=".8"/>
+</svg>
