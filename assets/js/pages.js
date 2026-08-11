@@ -1,5 +1,5 @@
 /* =========================================================================
-   PODB · Port Operation Dashboard
+   PMS · Port Management System
    pages.js — perakitan isi tiap halaman, termasuk konfigurasi grafik.
 
    Grafik TIDAK dibuat saat muat halaman: canvas di dalam elemen `hidden`
@@ -7,14 +7,14 @@
    dibuat lewat initCharts() ketika halamannya benar-benar dibuka.
 
    Bergantung pada: utils.js, data.js, render.js, Chart.js
-   Mengekspor: PODB.pages
+   Mengekspor: PMS.pages
    ========================================================================= */
-(function(PODB){
+(function(PMS){
 'use strict';
 
-const {$, renderList, nf, esc, badge, seededRandom, PALETTE} = PODB.utils;
-const R = PODB.render;
-const D = PODB.data;
+const {$, renderList, nf, esc, badge, seededRandom, PALETTE} = PMS.utils;
+const R = PMS.render;
+const D = PMS.data;
 
 /* =========================================================================
    DASHBOARD
@@ -341,7 +341,7 @@ function buildMessages(){
 function buildReports(){
   renderList($('#reportGrid'), D.REPORTS, (r, i) => `
     <div class="card report-card" data-report="${i}">
-      <div class="ric">${PODB.utils.icon(r.icon)}</div>
+      <div class="ric">${PMS.utils.icon(r.icon)}</div>
       <h3>${r.title}</h3><p>${r.desc}</p>
       <div class="export-row">
         <button type="button" class="export-btn" data-format="PDF">PDF</button>
@@ -399,7 +399,7 @@ function buildDirectories(){
 /* =========================================================================
    EKSPOR
    ========================================================================= */
-PODB.pages = {
+PMS.pages = {
   buildDashboard,
   buildVesselBoard, renderVesselBoard, vbState,
   buildResources,
@@ -408,4 +408,4 @@ PODB.pages = {
   buildReports, buildDirectories
 };
 
-})(window.PODB = window.PODB || {});
+})(window.PMS = window.PMS || {});

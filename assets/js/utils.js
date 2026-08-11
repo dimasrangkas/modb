@@ -1,11 +1,11 @@
 /* =========================================================================
-   PODB · Port Operation Dashboard
+   PMS · Port Management System
    utils.js — helper DOM, format angka, ikon, dan pemetaan warna status.
 
    Tidak bergantung pada berkas lain. Dimuat PERTAMA.
-   Mengekspor: PODB.utils
+   Mengekspor: PMS.utils
    ========================================================================= */
-(function(PODB){
+(function(PMS){
 'use strict';
 
 /* ------------------------------------------------------------ helper DOM */
@@ -89,11 +89,11 @@ const statusColor = s => STATUS_COLOR[s] || PALETTE.warning;
 const badge       = s => `<span class="badge ${badgeClass(s)}"><i></i>${esc(s)}</span>`;
 
 /* --------------------------------------------------------------- ekspor */
-PODB.utils = {
+PMS.utils = {
   $, $$, renderList,
   nf, toHours, esc, seededRandom,
   ICONS, icon,
   PALETTE, badge, badgeClass, statusColor
 };
 
-})(window.PODB = window.PODB || {});
+})(window.PMS = window.PMS || {});

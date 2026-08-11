@@ -1,5 +1,5 @@
 /* =========================================================================
-   PODB · Port Operation Dashboard
+   PMS · Port Management System
    data.js — SATU-SATUNYA sumber data aplikasi.
 
    Nama pelabuhan, terminal, dermaga, perusahaan pelayaran, kapal dan instansi
@@ -7,12 +7,12 @@
    keperluan demonstrasi — termasuk nomor IMO, tarif dan volume.
 
    Bergantung pada: utils.js
-   Mengekspor: PODB.data
+   Mengekspor: PMS.data
    ========================================================================= */
-(function(PODB){
+(function(PMS){
 'use strict';
 
-const {PALETTE, toHours} = PODB.utils;
+const {PALETTE, toHours} = PMS.utils;
 
 /* =========================================================================
    1. NAVIGASI
@@ -384,7 +384,7 @@ const MESSAGES = [
   {src:'Notice',  title:'Jadwal perawatan dermaga NPCT1 02',                    meta:'KSOP Utama Tanjung Priok · Maklumat Pelayaran',      t:'13:58:03', parse:'ok',   valid:'valid'},
   {src:'Pilot',   title:'Pandu naik ke kapal dikonfirmasi — KM Kelud',          meta:'Stasiun Pandu Tanjung Priok · Capt. Ahmad Fauzi',    t:'13:44:19', parse:'ok',   valid:'valid'},
   {src:'Tug',     title:'Penugasan tunda diperbarui — KT Bima 306',             meta:'PT Jasa Armada Indonesia · Koja 02',                 t:'13:30:02', parse:'ok',   valid:'valid'},
-  {src:'System',  title:'Feed radar tersambung kembali — Sektor 2',             meta:'Monitor Kesehatan Sistem PODB',                      t:'13:12:47', parse:'warn', valid:'valid'},
+  {src:'System',  title:'Feed radar tersambung kembali — Sektor 2',             meta:'Monitor Kesehatan Sistem PMS',                      t:'13:12:47', parse:'warn', valid:'valid'},
   {src:'AIS',     title:'Pembaruan data statis — MV Sinar Sumba',               meta:'IMO 9312688 · Draft 9,4 m',                          t:'12:55:30', parse:'ok',   valid:'valid'},
   {src:'Customs', title:'Clearance disetujui — MT Gamsunoro',                   meta:'Bea Cukai Tanjung Priok · Meja 2',                   t:'12:40:11', parse:'ok',   valid:'valid'},
   {src:'Notice',  title:'Prakiraan cuaca maritim harian diterbitkan',           meta:'BMKG Maritim Tanjung Priok',                         t:'12:15:44', parse:'ok',   valid:'valid'},
@@ -455,7 +455,7 @@ VESSELS.forEach(v => {
 /* =========================================================================
    EKSPOR
    ========================================================================= */
-PODB.data = {
+PMS.data = {
   NAV, PORTS,
   LINES, lineOf, lineName, lineShort,
   BERTHS, BERTH_STATE, VESSELS, DERIVED,
@@ -466,4 +466,4 @@ PODB.data = {
   REPORTS, QUICK_ACTIONS
 };
 
-})(window.PODB = window.PODB || {});
+})(window.PMS = window.PMS || {});

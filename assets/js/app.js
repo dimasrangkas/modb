@@ -1,19 +1,19 @@
 /* =========================================================================
-   PODB · Port Operation Dashboard
+   PMS · Port Management System
    app.js — router antar halaman, pemasangan seluruh event listener, dan
    titik masuk aplikasi.
 
    Bergantung pada: utils.js, data.js, render.js, pages.js, copilot.js
    Dimuat TERAKHIR.
    ========================================================================= */
-(function(PODB){
+(function(PMS){
 'use strict';
 
-const {$, $$, renderList, nf} = PODB.utils;
-const D = PODB.data;
-const R = PODB.render;
-const P = PODB.pages;
-const C = PODB.copilot;
+const {$, $$, renderList, nf} = PMS.utils;
+const D = PMS.data;
+const R = PMS.render;
+const P = PMS.pages;
+const C = PMS.copilot;
 
 /* =========================================================================
    ROUTER
@@ -191,4 +191,4 @@ function init(){
 
 init();
 
-})(window.PODB = window.PODB || {});
+})(window.PMS = window.PMS || {});

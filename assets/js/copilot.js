@@ -1,17 +1,17 @@
 /* =========================================================================
-   PODB · Port Operation Dashboard
+   PMS · Port Management System
    copilot.js — panel asisten. Jawaban disusun dari data operasional yang
-   sedang tampil (PODB.data), bukan dari layanan eksternal, sehingga isinya
+   sedang tampil (PMS.data), bukan dari layanan eksternal, sehingga isinya
    selalu konsisten dengan angka di dashboard.
 
    Bergantung pada: utils.js, data.js
-   Mengekspor: PODB.copilot
+   Mengekspor: PMS.copilot
    ========================================================================= */
-(function(PODB){
+(function(PMS){
 'use strict';
 
-const {$, nf} = PODB.utils;
-const D = PODB.data;
+const {$, nf} = PMS.utils;
+const D = PMS.data;
 
 function addMessage(role, text){
   const chat = $('#aiChat');
@@ -65,9 +65,9 @@ function submitInput(){
 }
 
 function greet(){
-  addMessage('bot', 'Halo Bayu — saya PODB Copilot. Tanyakan soal ETA, alokasi dermaga, kepadatan alur, atau ringkasan operasi harian, atau gunakan aksi cepat di atas.');
+  addMessage('bot', 'Halo Bayu — saya PMS Copilot. Tanyakan soal ETA, alokasi dermaga, kepadatan alur, atau ringkasan operasi harian, atau gunakan aksi cepat di atas.');
 }
 
-PODB.copilot = {ask, submitInput, greet, addMessage};
+PMS.copilot = {ask, submitInput, greet, addMessage};
 
-})(window.PODB = window.PODB || {});
+})(window.PMS = window.PMS || {});

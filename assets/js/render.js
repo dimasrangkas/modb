@@ -1,17 +1,17 @@
 /* =========================================================================
-   PODB · Port Operation Dashboard
+   PMS · Port Management System
    render.js — komponen render yang dipakai lintas halaman: navigasi, kartu
    KPI, peta pelabuhan SVG, panel cuaca, peringatan, timeline, toast, jam,
    dan unduhan CSV.
 
    Bergantung pada: utils.js, data.js
-   Mengekspor: PODB.render
+   Mengekspor: PMS.render
    ========================================================================= */
-(function(PODB){
+(function(PMS){
 'use strict';
 
-const {$, $$, renderList, nf, esc, icon, PALETTE, statusColor} = PODB.utils;
-const D = PODB.data;
+const {$, $$, renderList, nf, esc, icon, PALETTE, statusColor} = PMS.utils;
+const D = PMS.data;
 
 /* =========================================================================
    NAVIGASI
@@ -196,11 +196,11 @@ function downloadCSV(filename, rows){
 /* =========================================================================
    EKSPOR
    ========================================================================= */
-PODB.render = {
+PMS.render = {
   renderNav, kpiCard,
   renderPortMap, renderWeather, renderAlerts,
   buildAxis, buildTimeline,
   showToast, tickClock, downloadCSV
 };
 
-})(window.PODB = window.PODB || {});
+})(window.PMS = window.PMS || {});

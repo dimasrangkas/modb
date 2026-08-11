@@ -1,4 +1,4 @@
-# PODB · Port Operation Dashboard
+# PMS · Port Management System
 
 Dashboard pemantauan operasional pelabuhan — Kementerian Kelautan dan Perikanan
 Republik Indonesia.
@@ -34,8 +34,8 @@ dengan specificity yang sama seperti di `layout.css`/`components.css`, sehingga
 pemenang cascade ditentukan oleh urutan berkas, bukan oleh media query.
 
 **JS** — `utils → data → render → pages → copilot → app`. Setiap berkas
-mendaftarkan dirinya pada namespace global `window.PODB` (`PODB.utils`,
-`PODB.data`, …). Pola ini dipilih agar halaman tetap bisa dibuka langsung dari
+mendaftarkan dirinya pada namespace global `window.PMS` (`PMS.utils`,
+`PMS.data`, …). Pola ini dipilih agar halaman tetap bisa dibuka langsung dari
 `file://`; ES module akan diblokir CORS tanpa web server.
 
 ## Mengganti lambang KKP

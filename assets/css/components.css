@@ -1,5 +1,5 @@
 /* =========================================================================
-   PODB · Port Operation Dashboard
+   PMS · Port Management System
    components.css — seluruh komponen UI di dalam halaman.
    Dimuat KETIGA (setelah layout, sebelum responsive).
    ========================================================================= */
@@ -195,7 +195,7 @@ tbody tr:hover td{background:#FAFDFF;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 .toast svg{width:15px;height:15px;stroke:var(--accent);flex-shrink:0;}
 
-/* ------------------------------------------------------- PODB Copilot */
+/* ------------------------------------------------------- PMS Copilot */
 .ai-fab{position:fixed;bottom:26px;right:26px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-2);border:none;z-index:150;}
 .ai-fab svg{width:24px;height:24px;stroke:#fff;}
 

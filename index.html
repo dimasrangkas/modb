@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="PODB — Port Operation Dashboard. Pemantauan operasional pelabuhan Indonesia secara real-time.">
-<title>PODB · Port Operation Dashboard</title>
+<meta name="description" content="PMS — Port Management System. Pemantauan operasional pelabuhan Indonesia secara real-time.">
+<title>PMS · Port Management System</title>
 
 <link rel="icon" href="assets/img/logo-kkp.svg" type="image/svg+xml">
 
@@ -38,8 +38,8 @@
       </div>
       <div class="brand-sep"></div>
       <div class="brand-app">
-        <b>PODB</b>
-        <small>Port Operation Dashboard</small>
+        <b>PMS</b>
+        <small>Port Management System</small>
       </div>
     </div>
 
@@ -73,7 +73,7 @@
   </header>
 
   <!-- ===================================================================
-       SIDEBAR — diisi dari PODB.data.NAV
+       SIDEBAR — diisi dari PMS.data.NAV
        =================================================================== -->
   <nav class="sidebar" id="sidebar" aria-label="Navigasi utama"></nav>
 
@@ -86,7 +86,7 @@
     <section class="page" id="page-dashboard">
       <div class="page-head">
         <div>
-          <h1>Port Operation Dashboard</h1>
+          <h1>Port Management System</h1>
           <div class="sub" id="portSub"></div>
         </div>
         <div class="live-pill"><span class="live-dot"></span> LIVE · sinkron 3 detik lalu</div>
@@ -142,7 +142,7 @@
       </div>
 
       <footer class="credits">
-        PODB · PORT OPERATION DASHBOARD<br>
+        PMS · PORT MANAGEMENT SYSTEM<br>
         Kementerian Kelautan dan Perikanan Republik Indonesia<br>
         Seluruh angka pada halaman ini adalah data simulasi untuk keperluan demonstrasi.
       </footer>
@@ -291,7 +291,7 @@
 
     <!-- ---------- PORTS ---------- -->
     <section class="page" id="page-ports" hidden>
-      <div class="page-head"><div><h1>Jaringan Pelabuhan</h1><div class="sub">Pelabuhan yang dipantau dalam instance PODB ini</div></div></div>
+      <div class="page-head"><div><h1>Jaringan Pelabuhan</h1><div class="sub">Pelabuhan yang dipantau dalam instance PMS ini</div></div></div>
       <div class="dir-grid" id="portsGrid"></div>
     </section>
 
@@ -299,15 +299,15 @@
 </div>
 
 <!-- =====================================================================
-     PODB COPILOT
+     PMS COPILOT
      ===================================================================== -->
-<button class="ai-fab" id="aiFab" aria-label="Buka PODB Copilot">
+<button class="ai-fab" id="aiFab" aria-label="Buka PMS Copilot">
   <svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><path d="M12 2l1.8 5.5L19 9l-5.2 1.5L12 16l-1.8-5.5L5 9l5.2-1.5z"/><circle cx="19" cy="19" r="2"/></svg>
 </button>
 
-<aside class="ai-slide" id="aiSlide" aria-label="PODB Copilot">
+<aside class="ai-slide" id="aiSlide" aria-label="PMS Copilot">
   <div class="ai-slide-head">
-    <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><path d="M12 2l1.8 5.5L19 9l-5.2 1.5L12 16l-1.8-5.5L5 9l5.2-1.5z"/></svg></span>PODB Copilot</h2>
+    <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><path d="M12 2l1.8 5.5L19 9l-5.2 1.5L12 16l-1.8-5.5L5 9l5.2-1.5z"/></svg></span>PMS Copilot</h2>
     <button class="ai-close" id="aiClose" aria-label="Tutup panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
   </div>
   <div class="ai-quick" id="aiQuick"></div>
@@ -325,7 +325,7 @@
 
 <!-- Urutan pemuatan JS penting: utils → data → render → pages → copilot → app.
      app.js memanggil init() dan mengasumsikan seluruh modul di atasnya sudah
-     terdaftar pada namespace global PODB. -->
+     terdaftar pada namespace global PMS. -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="assets/js/utils.js"></script>
 <script src="assets/js/data.js"></script>
