@@ -15,9 +15,41 @@ Terakhir diperbarui: **12 Agustus 2026**
 | Akronim | PMS |
 | Namespace JS | `window.PMS` |
 | Institusi | Kementerian Kelautan dan Perikanan Republik Indonesia |
-| Nama folder repositori | `modb` |
+| Nama folder repositori | `modb` — **sengaja dibiarkan** |
 
-## 1. Keputusan arsitektur
+### Riwayat penamaan
+
+Aplikasi ini berganti nama dua kali:
+
+1. **MODB · Marine Operation Database** — nama awal.
+2. **PODB · Port Operation Dashboard** — penggantian pertama.
+3. **PMS · Port Management System** — nama sekarang.
+
+Nama folder tetap `modb` atas permintaan eksplisit pengguna. Tidak ada kode
+yang menyebut nama folder (semua path relatif), jadi keduanya memang tidak
+terikat. **Jangan menawarkan penggantian nama folder lagi** — sudah ditanyakan
+dan jawabannya tetap `modb`.
+
+Identitas produk terpusat di `APP` pada `data.js`. Mengubah nama cukup di sana
+untuk topbar, copilot dan footer; sisanya adalah `<title>` tiap halaman dan
+banner komentar.
+
+## 2. Keputusan arsitektur
+
+### MPA, bukan SPA (12 Agustus 2026)
+Awalnya aplikasi berupa satu `index.html` dengan sepuluh `<section>` yang
+disembunyikan dan router JavaScript. Atas permintaan pengguna, dipecah menjadi
+sepuluh berkas HTML terpisah.
+
+Konsekuensi yang sudah ditangani:
+- Kerangka (topbar, sidebar, copilot, toast, footer) **dirender JavaScript**,
+  bukan disalin sepuluh kali. Ini keputusan sadar: menyalin markup topbar ke
+  sepuluh berkas berarti sepuluh tempat yang harus diubah setiap kali.
+- Navigasi berubah dari `<button>` + router menjadi `<a href>` antar berkas.
+- Pemasangan event harus tahan elemen tak ada → helper `on()`.
+- Pencarian global tidak bisa lagi memindah halaman di tempat; sekarang
+  mengarahkan ke `vessel-board.html?q=…`.
+- Pemilihan pelabuhan tidak lagi bertahan otomatis; disimpan lewat `store`.
 
 ### Namespace global, bukan ES module
 Persyaratan: halaman harus bisa dibuka dengan klik ganda (`file://`). ES module
@@ -39,7 +71,7 @@ semua yang bisa dihitung diturunkan dari `BERTHS` + `VESSELS` di satu tempat.
 `analytics.html` dan `executive.html`. Halaman lain tidak memuatnya sama
 sekali; kode dijaga `typeof Chart === 'undefined'`.
 
-## 2. Keputusan data
+## 3. Keputusan data
 
 ### Entitas nyata, angka simulasi
 Nama pelabuhan (Tanjung Priok, Tanjung Perak, Belawan, …), terminal (JICT,
@@ -62,7 +94,7 @@ Dermaga: 12 total → 9 terpakai, 1 perawatan (NPCT1-02), 2 tersedia → BOR 75,
 Angka ini muncul di KPI Dashboard, kartu dermaga di Resources, dan peta —
 ketiganya dari `DERIVED`, bukan ditulis tiga kali.
 
-## 3. Keputusan tampilan
+## 4. Keputusan tampilan
 
 ### Font tunggal Plus Jakarta Sans
 Menggantikan IBM Plex Sans + Inter + IBM Plex Mono. Karena tidak ada font
@@ -75,7 +107,14 @@ ke daftar itu.**
 SVG agar berkas tetap mandiri tanpa aset eksternal. Penggantian dengan lambang
 resmi = menimpa satu berkas, tanpa mengubah kode.
 
-## 4. Bug yang pernah terjadi
+Ini sudah disampaikan ke pengguna. Jangan mengklaim logo ini resmi.
+
+### Judul halaman Dashboard
+Pernah berbunyi sama dengan nama aplikasi. Sejak pemecahan MPA, `h1`-nya
+menjadi "Dashboard" — nama aplikasi sudah tampil di topbar, jadi pengulangan
+tidak perlu.
+
+## 5. Bug yang pernah terjadi
 
 | Bug | Akibat | Perbaikan |
 |-----|--------|-----------|
@@ -86,7 +125,7 @@ resmi = menimpa satu berkas, tanpa mengubah kode.
 | Pemilih pelabuhan & pencarian global tidak berfungsi | Kontrol mati di UI | Dipasangkan listener |
 | `toggleAttribute('aria-current', true)` | Menghasilkan `aria-current=""`, CSS menargetkan `="page"` | Ditulis eksplisit dengan `setAttribute` |
 
-## 5. Catatan lingkungan kerja
+## 6. Catatan lingkungan kerja
 
 - Shell adalah **zsh**: ekspansi variabel tanpa kutip **tidak** dipecah jadi
   argumen terpisah. `sed ... $FILES` gagal; tulis daftar berkasnya langsung
@@ -98,8 +137,12 @@ resmi = menimpa satu berkas, tanpa mengubah kode.
   sekali pakai yang memeriksa kecocokan NAV ↔ berkas ↔ `data-page` ↔ selector
   builder. Pola skripnya ada di `IMPLEMENTATION.md` bagian 8.
 
-## 6. Preferensi cara kerja pengguna
+## 7. Preferensi cara kerja pengguna
 
 - Bahasa komunikasi: Indonesia.
 - Pengguna kadang mengedit berkas sendiri di IDE di sela pekerjaan (pernah
   melakukan find/replace sebagian). **Periksa keadaan berkas sebelum menimpa.**
+- Commit hanya bila diminta. Sampai catatan ini ditulis, semua pekerjaan
+  ditinggal di working tree.
+- Pengguna meminta rename dilakukan "di kode saja" — jangan meluas ke nama
+  folder atau hal di luar yang diminta.
