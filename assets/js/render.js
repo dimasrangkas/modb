@@ -12,19 +12,114 @@
 
 const {$, $$, renderList, nf, esc, icon, PALETTE, statusColor} = PMS.utils;
 const D = PMS.data;
+const APP = D.APP;
 
 /* =========================================================================
-   NAVIGASI
+   KERANGKA HALAMAN (SHELL)
+
+   Topbar, sidebar, panel copilot dan toast identik di seluruh halaman, jadi
+   markup-nya dirender dari sini — bukan disalin ke 10 berkas HTML. Tiap
+   berkas halaman cukup berisi <main> dengan isi khasnya sendiri.
    ========================================================================= */
-function renderNav(){
+
+/** Sidebar. `currentPage` dicocokkan dengan NAV[].id untuk menandai halaman aktif. */
+function renderNav(currentPage){
   $('#sidebar').innerHTML = D.NAV.map(group => `
     <div class="nav-group-label">${group.group}</div>
     ${group.items.map(item => `
-      <button type="button" class="nav-item" data-page="${item.id}"
-        ${item.id === 'dashboard' ? 'aria-current="page"' : ''}>
+      <a class="nav-item" href="${item.href}"${item.id === currentPage ? ' aria-current="page"' : ''}>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">${item.svg}</svg>${item.label}
-      </button>`).join('')}
+      </a>`).join('')}
   `).join('');
+}
+
+function renderTopbar(){
+  $('#topbar').innerHTML = `
+    <div class="brand">
+      <a class="brand-home" href="index.html" aria-label="Beranda ${APP.short}">
+        <img class="brand-logo" src="assets/img/logo-kkp.svg"
+             alt="Lambang Kementerian Kelautan dan Perikanan Republik Indonesia">
+      </a>
+      <div class="brand-inst">
+        <b>Kementerian Kelautan</b>
+        <b>dan Perikanan</b>
+        <span>Republik Indonesia</span>
+      </div>
+      <div class="brand-sep"></div>
+      <div class="brand-app">
+        <b>${APP.short}</b>
+        <small>${APP.name}</small>
+      </div>
+    </div>
+
+    <div class="top-mid">
+      <label class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+        <input id="globalSearch" type="search" placeholder="Cari kapal, IMO, voyage, dermaga…" aria-label="Pencarian global">
+      </label>
+    </div>
+
+    <div class="top-right">
+      <select class="port-select" id="portSelect" aria-label="Pilih pelabuhan"></select>
+
+      <div class="weather-chip" id="weatherChip">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><path d="M17.5 19a4.5 4.5 0 000-9 6 6 0 00-11.3-1.8A4 4 0 007 16"/></svg>
+        <span id="weatherChipText"></span>
+      </div>
+
+      <div class="clock"><b id="clockTime">--:--:--</b><span id="clockDate">-- --- ----</span></div>
+
+      <a class="icon-btn" id="notifBtn" href="messages.html" aria-label="Notifikasi operasional">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <span class="dot-badge"></span>
+      </a>
+
+      <div class="profile">
+        <div class="avatar">${APP.user.initials}</div>
+        <div class="who"><b>${APP.user.name}</b><span>${APP.user.role}</span></div>
+      </div>
+    </div>`;
+}
+
+/** Panel copilot + toast disisipkan ke akhir <body> di setiap halaman. */
+function renderOverlays(){
+  const wrap = document.createElement('div');
+  wrap.innerHTML = `
+    <button class="ai-fab" id="aiFab" aria-label="Buka ${APP.short} Copilot">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><path d="M12 2l1.8 5.5L19 9l-5.2 1.5L12 16l-1.8-5.5L5 9l5.2-1.5z"/><circle cx="19" cy="19" r="2"/></svg>
+    </button>
+
+    <aside class="ai-slide" id="aiSlide" aria-label="${APP.short} Copilot">
+      <div class="ai-slide-head">
+        <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><path d="M12 2l1.8 5.5L19 9l-5.2 1.5L12 16l-1.8-5.5L5 9l5.2-1.5z"/></svg></span>${APP.short} Copilot</h2>
+        <button class="ai-close" id="aiClose" aria-label="Tutup panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+      </div>
+      <div class="ai-quick" id="aiQuick"></div>
+      <div class="ai-chat" id="aiChat"></div>
+      <div class="ai-input-row">
+        <input id="aiInput" placeholder="Tanyakan apa saja ke copilot…" aria-label="Pertanyaan untuk copilot">
+        <button id="aiSend" aria-label="Kirim"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg></button>
+      </div>
+    </aside>
+
+    <div class="toast" id="toast" role="status" aria-live="polite">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+      <span id="toastMsg"></span>
+    </div>`;
+  while(wrap.firstElementChild) document.body.appendChild(wrap.firstElementChild);
+}
+
+/** Footer kredit — dipasang di dasar setiap halaman. */
+function renderCredits(){
+  const main = $('.main');
+  if(!main) return;
+  const el = document.createElement('footer');
+  el.className = 'credits';
+  el.innerHTML = `
+    ${APP.short} · ${APP.name.toUpperCase()}<br>
+    ${APP.institution}<br>
+    Seluruh angka pada halaman ini adalah data simulasi untuk keperluan demonstrasi.`;
+  main.appendChild(el);
 }
 
 /* =========================================================================
@@ -121,17 +216,29 @@ function renderPortMap(){
 /* =========================================================================
    CUACA & PERINGATAN
    ========================================================================= */
+/**
+ * Chip cuaca ada di topbar (semua halaman); kartu cuaca lengkap hanya ada di
+ * Dashboard — karena itu bagian kartu dilewati bila elemennya tidak ada.
+ */
 function renderWeather(port){
   const w = port.weather;
+
+  const chip = $('#weatherChipText');
+  if(chip) chip.innerHTML = `<b>${esc(w.cond.split(', ')[1] || '')}</b> ${esc(w.wind)}`;
+
+  const container = $('#weatherRows');
+  if(!container) return;
+
   const rows = [
     ['Kondisi', w.cond], ['Angin', w.wind], ['Jarak Pandang', w.vis],
     ['Tinggi Gelombang', w.wave], ['Wilayah Perairan', w.area],
     ['Pasang Tertinggi', w.high], ['Surut Terendah', w.low], ['Tinggi Muka Air', w.level]
   ];
-  renderList($('#weatherRows'), rows, r => `<div class="tide-row"><span>${r[0]}</span><b>${esc(r[1])}</b></div>`);
-  $('#weatherNote').textContent =
+  renderList(container, rows, r => `<div class="tide-row"><span>${r[0]}</span><b>${esc(r[1])}</b></div>`);
+
+  const note = $('#weatherNote');
+  if(note) note.textContent =
     'Format mengikuti prakiraan cuaca maritim BMKG dan data pasang surut Pushidrosal — nilai simulasi.';
-  $('#weatherChipText').innerHTML = `<b>${esc(w.cond.split(', ')[1] || '')}</b> ${esc(w.wind)}`;
 }
 
 function renderAlerts(){
@@ -197,7 +304,8 @@ function downloadCSV(filename, rows){
    EKSPOR
    ========================================================================= */
 PMS.render = {
-  renderNav, kpiCard,
+  renderNav, renderTopbar, renderOverlays, renderCredits,
+  kpiCard,
   renderPortMap, renderWeather, renderAlerts,
   buildAxis, buildTimeline,
   showToast, tickClock, downloadCSV

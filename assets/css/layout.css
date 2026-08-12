@@ -21,6 +21,7 @@
 }
 
 .brand{display:flex;align-items:center;gap:11px;min-width:0;}
+.brand-home{display:flex;flex-shrink:0;}
 .brand-logo{width:38px;height:38px;flex-shrink:0;display:block;}
 .brand-inst{line-height:1.2;min-width:0;}
 .brand-inst b{display:block;font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--secondary);white-space:nowrap;}
@@ -41,7 +42,7 @@
 .weather-chip b{color:var(--text-hi);font-weight:700;}
 .clock{font-size:12.5px;color:var(--text-mid);text-align:right;line-height:1.3;min-width:78px;}
 .clock b{display:block;color:var(--text-hi);font-size:14px;font-weight:700;}
-.icon-btn{width:36px;height:36px;border-radius:10px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-mid);position:relative;flex-shrink:0;}
+.icon-btn{width:36px;height:36px;border-radius:10px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-mid);position:relative;flex-shrink:0;text-decoration:none;}
 .icon-btn svg{width:16.5px;height:16.5px;}
 .dot-badge{position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--danger);border:1.5px solid var(--card);}
 .profile{display:flex;align-items:center;gap:9px;padding-left:12px;border-left:1px solid var(--border);}
@@ -58,11 +59,13 @@
   position:sticky;top:64px;height:calc(100vh - 64px);overflow-y:auto;
 }
 .nav-group-label{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-low);padding:14px 12px 6px;}
+/* Item navigasi adalah <a> ke berkas halaman lain — bukan tombol router. */
 .nav-item{
   display:flex;align-items:center;gap:11px;width:100%;
   padding:9px 12px;margin-bottom:2px;
   border:none;border-radius:10px;background:none;text-align:left;
-  color:var(--text-mid);font-size:13.5px;font-weight:600;transition:.15s;
+  color:var(--text-mid);font-size:13.5px;font-weight:600;
+  text-decoration:none;transition:.15s;
 }
 .nav-item svg{width:17px;height:17px;flex-shrink:0;}
 .nav-item:hover{background:var(--bg);color:var(--text-hi);}

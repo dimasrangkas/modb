@@ -17,6 +17,43 @@ function renderList(container, items, template){
   container.innerHTML = items.map(template).join('');
 }
 
+/**
+ * addEventListener yang aman terhadap elemen yang tidak ada.
+ * Dibutuhkan karena tiap halaman hanya memuat sebagian kontrol: pemasangan
+ * listener dijalankan dari app.js yang sama untuk semua halaman.
+ */
+function on(target, event, handler){
+  const el = typeof target === 'string' ? $(target) : target;
+  if(el) el.addEventListener(event, handler);
+  return el;
+}
+
+/**
+ * Penyimpanan preferensi antar halaman (mis. pelabuhan yang dipilih).
+ * Sebagian browser melempar SecurityError saat mengakses localStorage dari
+ * file://, jadi selalu ada fallback ke memori — preferensi tetap berfungsi
+ * dalam satu halaman, hanya tidak bertahan saat pindah halaman.
+ */
+const memoryStore = Object.create(null);
+const store = {
+  get(key){
+    try{
+      const value = localStorage.getItem(key);
+      if(value !== null) return value;
+    }catch(e){ /* file:// — abaikan */ }
+    return memoryStore[key] ?? null;
+  },
+  set(key, value){
+    memoryStore[key] = value;
+    try{ localStorage.setItem(key, value); }catch(e){ /* file:// — abaikan */ }
+  }
+};
+
+/** Baca satu parameter dari query string, mis. vessel-board.html?q=kelud */
+function queryParam(name){
+  return new URLSearchParams(window.location.search).get(name) || '';
+}
+
 /* --------------------------------------------------------------- format */
 /** Format angka gaya Indonesia: 18.420 · 1,4 */
 const nf = (n, dec = 0) =>
@@ -90,8 +127,9 @@ const badge       = s => `<span class="badge ${badgeClass(s)}"><i></i>${esc(s)}<
 
 /* --------------------------------------------------------------- ekspor */
 PMS.utils = {
-  $, $$, renderList,
+  $, $$, renderList, on,
   nf, toHours, esc, seededRandom,
+  store, queryParam,
   ICONS, icon,
   PALETTE, badge, badgeClass, statusColor
 };

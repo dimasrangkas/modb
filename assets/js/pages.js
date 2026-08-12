@@ -352,9 +352,9 @@ function buildReports(){
 }
 
 /* =========================================================================
-   DIREKTORI: pelayaran, registri kapal, pelabuhan
+   DIREKTORI — masing-masing kini menempati halaman sendiri
    ========================================================================= */
-function buildDirectories(){
+function buildShippingLines(){
   renderList($('#shippingLinesGrid'), D.LINES, l => {
     const active = D.VESSELS.filter(v => v.line === l.code && v.status !== 'Departed').length;
     return `<div class="card dir-card">
@@ -370,13 +370,17 @@ function buildDirectories(){
       </div>
     </div>`;
   });
+}
 
+function buildVesselRegistry(){
   renderList($('#vesselsRegistryBody'), D.VESSELS, v => `
     <tr>
       <td class="name">${esc(v.name)}</td><td>${esc(v.imo)}</td><td>${esc(v.type)}</td><td>${esc(v.flag)}</td>
       <td>${nf(v.gt)}</td><td>${nf(v.loa)}</td><td>${esc(D.lineName(v.line))}</td><td>${badge(v.status)}</td>
     </tr>`);
+}
 
+function buildPorts(){
   renderList($('#portsGrid'), D.PORTS, p => `
     <div class="card dir-card">
       <div class="dir-top">
@@ -405,7 +409,8 @@ PMS.pages = {
   buildResources,
   buildAnalytics, buildExecutive, initCharts,
   buildMessages, renderMessages,
-  buildReports, buildDirectories
+  buildReports,
+  buildShippingLines, buildVesselRegistry, buildPorts
 };
 
 })(window.PMS = window.PMS || {});

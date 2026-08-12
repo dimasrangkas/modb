@@ -3,11 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="PMS — Port Management System. Pemantauan operasional pelabuhan Indonesia secara real-time.">
-<title>PMS · Port Management System</title>
+<meta name="description" content="PMS — Port Management System. Ikhtisar operasional pelabuhan Indonesia secara real-time.">
+<title>Dashboard · PMS Port Management System</title>
 
 <link rel="icon" href="assets/img/logo-kkp.svg" type="image/svg+xml">
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -19,74 +18,19 @@
 <link rel="stylesheet" href="assets/css/responsive.css">
 </head>
 
-<body>
+<body data-page="dashboard">
 <div class="app">
-
-  <!-- ===================================================================
-       TOPBAR
-       =================================================================== -->
-  <header class="topbar">
-    <div class="brand">
-      <!-- Lambang KKP. Untuk memakai lambang resmi, cukup timpa berkas
-           assets/img/logo-kkp.svg — tidak ada kode lain yang perlu diubah. -->
-      <img class="brand-logo" src="assets/img/logo-kkp.svg"
-           alt="Lambang Kementerian Kelautan dan Perikanan Republik Indonesia">
-      <div class="brand-inst">
-        <b>Kementerian Kelautan</b>
-        <b>dan Perikanan</b>
-        <span>Republik Indonesia</span>
-      </div>
-      <div class="brand-sep"></div>
-      <div class="brand-app">
-        <b>PMS</b>
-        <small>Port Management System</small>
-      </div>
-    </div>
-
-    <div class="top-mid">
-      <label class="search-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
-        <input id="globalSearch" type="search" placeholder="Cari kapal, IMO, voyage, dermaga…" aria-label="Pencarian global">
-      </label>
-    </div>
-
-    <div class="top-right">
-      <select class="port-select" id="portSelect" aria-label="Pilih pelabuhan"></select>
-
-      <div class="weather-chip" id="weatherChip">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><path d="M17.5 19a4.5 4.5 0 000-9 6 6 0 00-11.3-1.8A4 4 0 007 16"/></svg>
-        <span id="weatherChipText"></span>
-      </div>
-
-      <div class="clock"><b id="clockTime">--:--:--</b><span id="clockDate">-- --- ----</span></div>
-
-      <button class="icon-btn" id="notifBtn" aria-label="Notifikasi operasional">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-        <span class="dot-badge"></span>
-      </button>
-
-      <div class="profile">
-        <div class="avatar">BP</div>
-        <div class="who"><b>Bayu Prasetya</b><span>Supervisor Operasi Terminal</span></div>
-      </div>
-    </div>
-  </header>
-
-  <!-- ===================================================================
-       SIDEBAR — diisi dari PMS.data.NAV
-       =================================================================== -->
+  <!-- Topbar dan sidebar dirender oleh assets/js/render.js agar identik
+       di seluruh halaman. Jangan menyalin markup-nya ke sini. -->
+  <header class="topbar" id="topbar"></header>
   <nav class="sidebar" id="sidebar" aria-label="Navigasi utama"></nav>
 
-  <!-- ===================================================================
-       MAIN
-       =================================================================== -->
   <main class="main">
+    <section class="page">
 
-    <!-- ---------- DASHBOARD ---------- -->
-    <section class="page" id="page-dashboard">
       <div class="page-head">
         <div>
-          <h1>Port Management System</h1>
+          <h1>Dashboard</h1>
           <div class="sub" id="portSub"></div>
         </div>
         <div class="live-pill"><span class="live-dot"></span> LIVE · sinkron 3 detik lalu</div>
@@ -141,192 +85,11 @@
         <div class="card side-card"><h2>Ketersediaan Sumber Daya</h2><div class="resource-grid-mini" id="resAvail"></div></div>
       </div>
 
-      <footer class="credits">
-        PMS · PORT MANAGEMENT SYSTEM<br>
-        Kementerian Kelautan dan Perikanan Republik Indonesia<br>
-        Seluruh angka pada halaman ini adalah data simulasi untuk keperluan demonstrasi.
-      </footer>
     </section>
-
-    <!-- ---------- VESSEL BOARD ---------- -->
-    <section class="page" id="page-vesselboard" hidden>
-      <div class="page-head">
-        <div><h1>Vessel Board</h1><div class="sub">Status operasional kapal di seluruh dermaga dan area labuh jangkar</div></div>
-        <div class="live-pill"><span class="live-dot"></span> LIVE TRACKING</div>
-      </div>
-
-      <div class="card" style="padding:18px 20px;">
-        <div class="toolbar">
-          <div class="filter-chips" id="vbFilters"></div>
-          <div style="display:flex;gap:10px;align-items:center;">
-            <input id="vbSearch" class="text-input" style="min-width:220px;" type="search" placeholder="Cari kapal / IMO / voyage…" aria-label="Cari kapal">
-            <div class="view-toggle" id="vbView">
-              <button data-view="table"    aria-pressed="true">Tabel</button>
-              <button data-view="timeline" aria-pressed="false">Timeline</button>
-            </div>
-          </div>
-        </div>
-
-        <div id="vbTableWrap" style="overflow-x:auto;">
-          <table>
-            <thead><tr>
-              <th>Kapal</th><th>Voyage</th><th>Operator</th><th>IMO</th><th>Asal</th><th>Tujuan</th>
-              <th>ETA</th><th>ETD</th><th>ATA</th><th>ATD</th><th>Dermaga</th><th>Pandu</th><th>Tunda</th>
-              <th>Muatan</th><th>Bea Cukai</th><th>Status</th>
-            </tr></thead>
-            <tbody id="vbBody"></tbody>
-          </table>
-        </div>
-
-        <div id="vbTimelineWrap" hidden style="overflow-x:auto;">
-          <div class="tl-axis" id="vbTlAxis"></div>
-          <div id="vbTlBody"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ---------- RESOURCES ---------- -->
-    <section class="page" id="page-resources" hidden>
-      <div class="page-head"><div><h1>Resource Management</h1><div class="sub">Dermaga, peralatan bongkar muat, terminal dan kapasitas lapangan penumpukan</div></div></div>
-
-      <div class="section-label">Tata Letak &amp; Okupansi Dermaga</div>
-      <div class="card" style="padding:20px;"><div class="berth-grid" id="berthGrid"></div></div>
-
-      <div class="section-label">Utilisasi Peralatan &amp; Armada</div>
-      <div class="grid-2">
-        <div class="card res-list-card"><h2>Container Crane &amp; RTG</h2><div id="craneList"></div></div>
-        <div class="card res-list-card"><h2>Kapal Tunda &amp; Kapal Pandu</h2><div id="tugList"></div></div>
-      </div>
-
-      <div class="section-label">Kapasitas Terminal</div>
-      <div class="grid-3">
-        <div class="card side-card"><h2>Gudang</h2><div id="warehouseList"></div></div>
-
-        <div class="card side-card">
-          <h2>Lapangan Penumpukan (TEU)</h2>
-          <div class="big-stat" id="yardStat"></div>
-          <div class="bar-track" style="margin-top:8px;"><div class="bar-fill" id="yardBar" style="background:var(--primary);"></div></div>
-          <div class="yard-grid" id="yardGrid"></div>
-          <div class="card-note" id="yardNote"></div>
-        </div>
-
-        <div class="card side-card">
-          <h2>Terminal Penumpang &amp; Alat Bantu</h2>
-          <div class="big-stat" id="paxStat"></div>
-          <div class="bar-track" style="margin-top:8px;margin-bottom:14px;"><div class="bar-fill" id="paxBar" style="background:var(--accent);"></div></div>
-          <div id="equipmentList"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ---------- ANALYTICS ---------- -->
-    <section class="page" id="page-analytics" hidden>
-      <div class="page-head"><div><h1>Analytics</h1><div class="sub">Intelijen kinerja operasional pelabuhan</div></div></div>
-
-      <div class="card ai-panel" style="margin-bottom:22px;">
-        <div class="ai-head">
-          <div class="ai-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><path d="M12 2l1.8 5.5L19 9l-5.2 1.5L12 16l-1.8-5.5L5 9l5.2-1.5z"/></svg></div>
-          <h2>AI Insight Panel — Analitik Prediktif</h2>
-        </div>
-        <div id="aiInsights"></div>
-      </div>
-
-      <div class="analytics-grid" id="analyticsGrid"></div>
-
-      <div class="section-label">Heatmap Okupansi Dermaga</div>
-      <div class="card" style="padding:20px;overflow-x:auto;">
-        <div class="heat-hours" id="heatHours"></div>
-        <div id="heatBody"></div>
-      </div>
-    </section>
-
-    <!-- ---------- EXECUTIVE ---------- -->
-    <section class="page" id="page-executive" hidden>
-      <div class="page-head"><div><h1>Executive Dashboard</h1><div class="sub" id="execSub"></div></div></div>
-
-      <div class="kpi-grid" id="execKpiGrid" style="grid-template-columns:repeat(3,1fr);"></div>
-
-      <div class="section-label">Kinerja Bulanan</div>
-      <div class="card chart-card">
-        <h3>Pendapatan vs. Kunjungan Kapal — 12 Bulan Terakhir</h3>
-        <div class="sub">Indeks komposit, dinormalisasi terhadap periode dasar</div>
-        <canvas id="execChart" height="90"></canvas>
-      </div>
-
-      <div class="section-label">Ringkasan Eksekutif</div>
-      <div class="card side-card">
-        <div id="execSummary" style="font-size:13px;line-height:1.8;color:var(--text-mid);"></div>
-      </div>
-    </section>
-
-    <!-- ---------- MESSAGES ---------- -->
-    <section class="page" id="page-messages" hidden>
-      <div class="page-head"><div><h1>Maritime Communication Center</h1><div class="sub">Arus pesan AIS, VTS, KSOP, Bea Cukai, pandu dan sistem</div></div></div>
-      <div class="msg-tabs" id="msgTabs"></div>
-      <div class="card" style="padding:8px 20px;"><div id="msgList"></div></div>
-    </section>
-
-    <!-- ---------- REPORTS ---------- -->
-    <section class="page" id="page-reports" hidden>
-      <div class="page-head"><div><h1>Reports</h1><div class="sub">Pembuatan dan ekspor laporan operasional</div></div></div>
-      <div class="report-grid" id="reportGrid"></div>
-    </section>
-
-    <!-- ---------- SHIPPING LINES ---------- -->
-    <section class="page" id="page-shippinglines" hidden>
-      <div class="page-head"><div><h1>Perusahaan Pelayaran</h1><div class="sub">Operator pelayaran terdaftar pada jaringan pelabuhan ini</div></div></div>
-      <div class="dir-grid" id="shippingLinesGrid"></div>
-    </section>
-
-    <!-- ---------- VESSELS ---------- -->
-    <section class="page" id="page-vessels" hidden>
-      <div class="page-head"><div><h1>Registri Kapal</h1><div class="sub">Data induk kapal yang beroperasi di jaringan pelabuhan ini</div></div></div>
-      <div class="card table-card">
-        <table>
-          <thead><tr><th>Kapal</th><th>IMO</th><th>Jenis</th><th>Bendera</th><th>GT</th><th>LOA (m)</th><th>Operator</th><th>Status</th></tr></thead>
-          <tbody id="vesselsRegistryBody"></tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- ---------- PORTS ---------- -->
-    <section class="page" id="page-ports" hidden>
-      <div class="page-head"><div><h1>Jaringan Pelabuhan</h1><div class="sub">Pelabuhan yang dipantau dalam instance PMS ini</div></div></div>
-      <div class="dir-grid" id="portsGrid"></div>
-    </section>
-
   </main>
 </div>
 
-<!-- =====================================================================
-     PMS COPILOT
-     ===================================================================== -->
-<button class="ai-fab" id="aiFab" aria-label="Buka PMS Copilot">
-  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><path d="M12 2l1.8 5.5L19 9l-5.2 1.5L12 16l-1.8-5.5L5 9l5.2-1.5z"/><circle cx="19" cy="19" r="2"/></svg>
-</button>
-
-<aside class="ai-slide" id="aiSlide" aria-label="PMS Copilot">
-  <div class="ai-slide-head">
-    <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><path d="M12 2l1.8 5.5L19 9l-5.2 1.5L12 16l-1.8-5.5L5 9l5.2-1.5z"/></svg></span>PMS Copilot</h2>
-    <button class="ai-close" id="aiClose" aria-label="Tutup panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
-  </div>
-  <div class="ai-quick" id="aiQuick"></div>
-  <div class="ai-chat" id="aiChat"></div>
-  <div class="ai-input-row">
-    <input id="aiInput" placeholder="Tanyakan apa saja ke copilot…" aria-label="Pertanyaan untuk copilot">
-    <button id="aiSend" aria-label="Kirim"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg></button>
-  </div>
-</aside>
-
-<div class="toast" id="toast" role="status" aria-live="polite">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
-  <span id="toastMsg"></span>
-</div>
-
-<!-- Urutan pemuatan JS penting: utils → data → render → pages → copilot → app.
-     app.js memanggil init() dan mengasumsikan seluruh modul di atasnya sudah
-     terdaftar pada namespace global PMS. -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<!-- Urutan pemuatan JS penting: utils → data → render → pages → copilot → app -->
 <script src="assets/js/utils.js"></script>
 <script src="assets/js/data.js"></script>
 <script src="assets/js/render.js"></script>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Reports — pembuatan dan ekspor laporan operasional pelabuhan.">
+<title>Reports · PMS Port Management System</title>
+
+<link rel="icon" href="assets/img/logo-kkp.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- Urutan pemuatan CSS penting: responsive.css harus terakhir. -->
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/layout.css">
+<link rel="stylesheet" href="assets/css/components.css">
+<link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+
+<body data-page="reports">
+<div class="app">
+  <header class="topbar" id="topbar"></header>
+  <nav class="sidebar" id="sidebar" aria-label="Navigasi utama"></nav>
+
+  <main class="main">
+    <section class="page">
+
+      <div class="page-head">
+        <div>
+          <h1>Reports</h1>
+          <div class="sub">Pembuatan dan ekspor laporan operasional</div>
+        </div>
+      </div>
+
+      <div class="report-grid" id="reportGrid"></div>
+
+    </section>
+  </main>
+</div>
+
+<script src="assets/js/utils.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/render.js"></script>
+<script src="assets/js/pages.js"></script>
+<script src="assets/js/copilot.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

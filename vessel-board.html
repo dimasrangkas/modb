@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Vessel Board — status operasional kapal di seluruh dermaga dan area labuh jangkar.">
+<title>Vessel Board · PMS Port Management System</title>
+
+<link rel="icon" href="assets/img/logo-kkp.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- Urutan pemuatan CSS penting: responsive.css harus terakhir. -->
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/layout.css">
+<link rel="stylesheet" href="assets/css/components.css">
+<link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+
+<body data-page="vesselboard">
+<div class="app">
+  <header class="topbar" id="topbar"></header>
+  <nav class="sidebar" id="sidebar" aria-label="Navigasi utama"></nav>
+
+  <main class="main">
+    <section class="page">
+
+      <div class="page-head">
+        <div>
+          <h1>Vessel Board</h1>
+          <div class="sub">Status operasional kapal di seluruh dermaga dan area labuh jangkar</div>
+        </div>
+        <div class="live-pill"><span class="live-dot"></span> LIVE TRACKING</div>
+      </div>
+
+      <div class="card" style="padding:18px 20px;">
+        <div class="toolbar">
+          <div class="filter-chips" id="vbFilters"></div>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <input id="vbSearch" class="text-input" style="min-width:220px;" type="search"
+                   placeholder="Cari kapal / IMO / voyage…" aria-label="Cari kapal">
+            <div class="view-toggle" id="vbView">
+              <button data-view="table"    aria-pressed="true">Tabel</button>
+              <button data-view="timeline" aria-pressed="false">Timeline</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="vbTableWrap" style="overflow-x:auto;">
+          <table>
+            <thead><tr>
+              <th>Kapal</th><th>Voyage</th><th>Operator</th><th>IMO</th><th>Asal</th><th>Tujuan</th>
+              <th>ETA</th><th>ETD</th><th>ATA</th><th>ATD</th><th>Dermaga</th><th>Pandu</th><th>Tunda</th>
+              <th>Muatan</th><th>Bea Cukai</th><th>Status</th>
+            </tr></thead>
+            <tbody id="vbBody"></tbody>
+          </table>
+        </div>
+
+        <div id="vbTimelineWrap" hidden style="overflow-x:auto;">
+          <div class="tl-axis" id="vbTlAxis"></div>
+          <div id="vbTlBody"></div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+</div>
+
+<script src="assets/js/utils.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/render.js"></script>
+<script src="assets/js/pages.js"></script>
+<script src="assets/js/copilot.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

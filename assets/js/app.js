@@ -1,7 +1,12 @@
 /* =========================================================================
    PMS · Port Management System
-   app.js — router antar halaman, pemasangan seluruh event listener, dan
-   titik masuk aplikasi.
+   app.js — bootstrap aplikasi multi-halaman.
+
+   Setiap berkas HTML memuat rangkaian skrip yang sama. Yang membedakan hanya
+   atribut data-page pada <body>: nilainya menentukan builder mana yang
+   dijalankan dan item sidebar mana yang ditandai aktif. Berkas HTML yang
+   tidak dikenali tetap mendapat kerangka (topbar, sidebar, copilot) tanpa
+   error.
 
    Bergantung pada: utils.js, data.js, render.js, pages.js, copilot.js
    Dimuat TERAKHIR.
@@ -9,93 +14,112 @@
 (function(PMS){
 'use strict';
 
-const {$, $$, renderList, nf} = PMS.utils;
+const {$, $$, renderList, on, store, queryParam} = PMS.utils;
 const D = PMS.data;
 const R = PMS.render;
 const P = PMS.pages;
 const C = PMS.copilot;
 
-/* =========================================================================
-   ROUTER
-   ========================================================================= */
-function goToPage(pageId){
-  $$('.nav-item').forEach(btn => {
-    if(btn.dataset.page === pageId) btn.setAttribute('aria-current', 'page');
-    else btn.removeAttribute('aria-current');
-  });
-
-  $$('.page').forEach(page => { page.hidden = page.id !== 'page-' + pageId; });
-
-  // Grafik dibuat setelah halaman terlihat agar canvas punya ukuran nyata.
-  P.initCharts(pageId);
-  window.scrollTo({top:0, behavior:'smooth'});
-}
-
-/** Set aria-pressed pada satu grup tombol berdasarkan data-<attr>. */
-function setPressed(container, attr, value){
-  $$('button', container).forEach(btn =>
-    btn.setAttribute('aria-pressed', String(btn.dataset[attr] === value)));
-}
+const PAGE = document.body.dataset.page || '';
 
 /* =========================================================================
-   KONTEKS PELABUHAN AKTIF
+   PELABUHAN AKTIF
+
+   Pilihan pelabuhan disimpan agar tidak ikut ter-reset setiap kali pindah
+   halaman. Bila penyimpanan tidak tersedia (mis. file:// pada sebagian
+   browser), utils.store otomatis jatuh ke memori.
    ========================================================================= */
+const PORT_KEY = 'pms.port';
+
+function currentPort(){
+  return D.PORTS.find(p => p.id === store.get(PORT_KEY)) || D.PORTS[0];
+}
+
 function applyPortContext(port){
-  $('#portSub').textContent  = `${port.name} · ${port.city} · ${port.operator} · ${port.coord}`;
-  $('#mapTitle').textContent = `Peta Pelabuhan ${port.name} — GIS View`;
+  store.set(PORT_KEY, port.id);
+
+  const sub = $('#portSub');
+  if(sub) sub.textContent = `${port.name} · ${port.city} · ${port.operator} · ${port.coord}`;
+
+  const mapTitle = $('#mapTitle');
+  if(mapTitle) mapTitle.textContent = `Peta Pelabuhan ${port.name} — GIS View`;
+
   R.renderWeather(port);
 }
 
 /* =========================================================================
-   EVENT
+   BUILDER PER HALAMAN
+   Kunci objek ini harus sama dengan data-page pada <body>.
    ========================================================================= */
-function wireEvents(){
-  /* ---- navigasi ---- */
-  $('#sidebar').addEventListener('click', e => {
-    const btn = e.target.closest('.nav-item');
-    if(btn) goToPage(btn.dataset.page);
-  });
+const BUILDERS = {
+  dashboard:     () => P.buildDashboard(currentPort()),
+  vesselboard:   () => P.buildVesselBoard(),
+  resources:     () => P.buildResources(),
+  analytics:     () => P.buildAnalytics(),
+  executive:     () => P.buildExecutive(),
+  messages:      () => P.buildMessages(),
+  reports:       () => P.buildReports(),
+  shippinglines: () => P.buildShippingLines(),
+  vessels:       () => P.buildVesselRegistry(),
+  ports:         () => P.buildPorts()
+};
 
-  /* ---- pemilih pelabuhan ---- */
-  $('#portSelect').addEventListener('change', e => {
+/* =========================================================================
+   EVENT KERANGKA — ada di semua halaman
+   ========================================================================= */
+function wireShellEvents(){
+  /* Pemilih pelabuhan */
+  on('#portSelect', 'change', e => {
     const port = D.PORTS.find(p => p.id === e.target.value);
     applyPortContext(port);
-    R.showToast(`Konteks pelabuhan: ${port.name} — detail operasional tetap menampilkan Tanjung Priok`);
+    R.showToast(PAGE === 'dashboard'
+      ? `Konteks pelabuhan: ${port.name} — detail operasional tetap menampilkan Tanjung Priok`
+      : `Konteks pelabuhan disimpan: ${port.name}`);
   });
 
-  /* ---- pencarian global: Enter melompat ke Vessel Board ---- */
-  $('#globalSearch').addEventListener('keydown', e => {
+  /* Pencarian global: Enter membuka Vessel Board dengan kata kunci terbawa */
+  on('#globalSearch', 'keydown', e => {
     if(e.key !== 'Enter') return;
     const term = e.target.value.trim();
     if(!term) return;
-
-    P.vbState.search = term;
-    P.vbState.filter = 'all';
-    $('#vbSearch').value = term;
-    setPressed($('#vbFilters'), 'filter', 'all');
-    P.renderVesselBoard();
-
-    goToPage('vesselboard');
-    R.showToast(`Menampilkan hasil pencarian untuk "${term}"`);
+    window.location.href = 'vessel-board.html?q=' + encodeURIComponent(term);
   });
 
-  $('#notifBtn').addEventListener('click', () => {
-    goToPage('messages');
-    R.showToast(`${D.ALERTS.length} peringatan operasional aktif`);
+  /* Copilot */
+  on('#aiFab', 'click',   () => $('#aiSlide').classList.add('open'));
+  on('#aiClose', 'click', () => $('#aiSlide').classList.remove('open'));
+  on('#aiQuick', 'click', e => {
+    const btn = e.target.closest('button');
+    if(btn) C.ask(btn.textContent);
   });
+  on('#aiSend', 'click', C.submitInput);
+  on('#aiInput', 'keydown', e => { if(e.key === 'Enter') C.submitInput(); });
+}
 
-  /* ---- layer peta ---- */
-  $('#layerToggles').addEventListener('click', e => {
+/* =========================================================================
+   EVENT KHUSUS HALAMAN
+   Semua memakai helper on() sehingga aman dipanggil di halaman yang tidak
+   memiliki kontrol bersangkutan.
+   ========================================================================= */
+function setPressed(container, attr, value){
+  if(!container) return;
+  $$('button', container).forEach(btn =>
+    btn.setAttribute('aria-pressed', String(btn.dataset[attr] === value)));
+}
+
+function wirePageEvents(){
+  /* ---- Dashboard: layer peta ---- */
+  on('#layerToggles', 'click', e => {
     const btn = e.target.closest('button');
     if(!btn) return;
-    const on = btn.getAttribute('aria-pressed') !== 'true';
-    btn.setAttribute('aria-pressed', String(on));
+    const active = btn.getAttribute('aria-pressed') !== 'true';
+    btn.setAttribute('aria-pressed', String(active));
     const layer = $('#layer' + btn.dataset.layer);
-    if(layer) layer.style.display = on ? '' : 'none';
+    if(layer) layer.style.display = active ? '' : 'none';
   });
 
-  /* ---- vessel board ---- */
-  $('#vbFilters').addEventListener('click', e => {
+  /* ---- Vessel Board ---- */
+  on('#vbFilters', 'click', e => {
     const btn = e.target.closest('button');
     if(!btn) return;
     P.vbState.filter = btn.dataset.filter;
@@ -103,12 +127,12 @@ function wireEvents(){
     P.renderVesselBoard();
   });
 
-  $('#vbSearch').addEventListener('input', e => {
+  on('#vbSearch', 'input', e => {
     P.vbState.search = e.target.value;
     P.renderVesselBoard();
   });
 
-  $('#vbView').addEventListener('click', e => {
+  on('#vbView', 'click', e => {
     const btn = e.target.closest('button');
     if(!btn) return;
     const timeline = btn.dataset.view === 'timeline';
@@ -121,16 +145,16 @@ function wireEvents(){
     }
   });
 
-  /* ---- pesan ---- */
-  $('#msgTabs').addEventListener('click', e => {
+  /* ---- Messages ---- */
+  on('#msgTabs', 'click', e => {
     const btn = e.target.closest('button');
     if(!btn) return;
     setPressed($('#msgTabs'), 'tab', btn.dataset.tab);
     P.renderMessages(btn.dataset.tab);
   });
 
-  /* ---- laporan ---- */
-  $('#reportGrid').addEventListener('click', e => {
+  /* ---- Reports ---- */
+  on('#reportGrid', 'click', e => {
     const btn = e.target.closest('.export-btn');
     if(!btn) return;
 
@@ -146,16 +170,6 @@ function wireEvents(){
       R.showToast(`Menyiapkan ${report.title} dalam format ${btn.dataset.format}…`);
     }
   });
-
-  /* ---- copilot ---- */
-  $('#aiFab').addEventListener('click',   () => $('#aiSlide').classList.add('open'));
-  $('#aiClose').addEventListener('click', () => $('#aiSlide').classList.remove('open'));
-  $('#aiQuick').addEventListener('click', e => {
-    const btn = e.target.closest('button');
-    if(btn) C.ask(btn.textContent);
-  });
-  $('#aiSend').addEventListener('click', C.submitInput);
-  $('#aiInput').addEventListener('keydown', e => { if(e.key === 'Enter') C.submitInput(); });
 }
 
 /* =========================================================================
@@ -167,24 +181,45 @@ function init(){
     Chart.defaults.color = '#6B7280';
   }
 
-  R.renderNav();
+  /* 1. Kerangka yang sama di semua halaman */
+  R.renderTopbar();
+  R.renderNav(PAGE);
+  R.renderOverlays();
+  R.renderCredits();
 
-  $('#portSelect').innerHTML = D.PORTS.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-  applyPortContext(D.PORTS[0]);
-
-  P.buildDashboard(D.PORTS[0]);
-  P.buildVesselBoard();
-  P.buildResources();
-  P.buildAnalytics();
-  P.buildExecutive();
-  P.buildMessages();
-  P.buildReports();
-  P.buildDirectories();
+  const port = currentPort();
+  $('#portSelect').innerHTML = D.PORTS
+    .map(p => `<option value="${p.id}"${p.id === port.id ? ' selected' : ''}>${p.name}</option>`)
+    .join('');
 
   renderList($('#aiQuick'), D.QUICK_ACTIONS, q => `<button type="button">${q}</button>`);
   C.greet();
 
-  wireEvents();
+  /* 2. Isi khas halaman ini */
+  const build = BUILDERS[PAGE];
+  if(build) build();
+
+  applyPortContext(port);
+
+  /* Grafik dibuat setelah isi halaman ada; canvas sudah terlihat di MPA
+     sehingga Chart.js langsung mendapat ukuran yang benar. */
+  P.initCharts(PAGE);
+
+  /* Kata kunci dari pencarian global halaman lain */
+  if(PAGE === 'vesselboard'){
+    const term = queryParam('q');
+    if(term){
+      P.vbState.search = term;
+      $('#vbSearch').value = term;
+      P.renderVesselBoard();
+      R.showToast(`Menampilkan hasil pencarian untuk "${term}"`);
+    }
+  }
+
+  /* 3. Event */
+  wireShellEvents();
+  wirePageEvents();
+
   R.tickClock();
   setInterval(R.tickClock, 1000);
 }

@@ -15,24 +15,38 @@
 const {PALETTE, toHours} = PMS.utils;
 
 /* =========================================================================
+   0. IDENTITAS APLIKASI
+   Dipakai oleh render.js untuk membangun topbar, panel copilot dan footer
+   di seluruh halaman — ubah di sini, berubah di semua halaman.
+   ========================================================================= */
+const APP = {
+  short:'PMS',
+  name:'Port Management System',
+  institution:'Kementerian Kelautan dan Perikanan Republik Indonesia',
+  user:{initials:'BP', name:'Bayu Prasetya', role:'Supervisor Operasi Terminal'}
+};
+
+/* =========================================================================
    1. NAVIGASI
    ========================================================================= */
+/* `id` harus sama dengan atribut data-page pada <body> tiap halaman —
+   itulah yang dipakai untuk menandai item navigasi yang sedang aktif. */
 const NAV = [
   {group:'Operasional', items:[
-    {id:'dashboard',   label:'Dashboard',     svg:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>'},
-    {id:'vesselboard', label:'Vessel Board',  svg:'<path d="M3 17l2-7h14l2 7"/><path d="M5 17v2h14v-2M7 10V6h10v4"/>'},
-    {id:'resources',   label:'Resources',     svg:'<path d="M3 7l9-4 9 4-9 4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/>'},
-    {id:'analytics',   label:'Analytics',     svg:'<path d="M3 3v18h18"/><path d="M7 15l4-6 3 3 5-8"/>'},
-    {id:'executive',   label:'Executive',     svg:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/>'}
+    {id:'dashboard',   label:'Dashboard',      href:'index.html',           svg:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>'},
+    {id:'vesselboard', label:'Vessel Board',   href:'vessel-board.html',    svg:'<path d="M3 17l2-7h14l2 7"/><path d="M5 17v2h14v-2M7 10V6h10v4"/>'},
+    {id:'resources',   label:'Resources',      href:'resources.html',       svg:'<path d="M3 7l9-4 9 4-9 4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/>'},
+    {id:'analytics',   label:'Analytics',      href:'analytics.html',       svg:'<path d="M3 3v18h18"/><path d="M7 15l4-6 3 3 5-8"/>'},
+    {id:'executive',   label:'Executive',      href:'executive.html',       svg:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/>'}
   ]},
   {group:'Komunikasi', items:[
-    {id:'messages',    label:'Messages',      svg:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 6l9 7 9-7"/>'},
-    {id:'reports',     label:'Reports',       svg:'<path d="M6 3h9l5 5v13H6z"/><path d="M9 12h6M9 16h6M9 8h3"/>'}
+    {id:'messages',    label:'Messages',       href:'messages.html',        svg:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 6l9 7 9-7"/>'},
+    {id:'reports',     label:'Reports',        href:'reports.html',         svg:'<path d="M6 3h9l5 5v13H6z"/><path d="M9 12h6M9 16h6M9 8h3"/>'}
   ]},
   {group:'Direktori', items:[
-    {id:'shippinglines', label:'Perusahaan Pelayaran', svg:'<path d="M4 21c2 1.2 4 1.2 6 0s4-1.2 6 0 4 1.2 6 0"/><path d="M6 17l.8-8h10.4l.8 8"/><path d="M12 9V4h4l-4 3"/>'},
-    {id:'vessels',     label:'Registri Kapal',svg:'<path d="M3 17l2-7h14l2 7"/><path d="M7 10V6h10v4"/><path d="M2 21c2 1 4 1 6 0s4-1 6 0 4 1 6 0"/>'},
-    {id:'ports',       label:'Pelabuhan',     svg:'<path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/>'}
+    {id:'shippinglines', label:'Perusahaan Pelayaran', href:'shipping-lines.html', svg:'<path d="M4 21c2 1.2 4 1.2 6 0s4-1.2 6 0 4 1.2 6 0"/><path d="M6 17l.8-8h10.4l.8 8"/><path d="M12 9V4h4l-4 3"/>'},
+    {id:'vessels',     label:'Registri Kapal', href:'vessels.html',         svg:'<path d="M3 17l2-7h14l2 7"/><path d="M7 10V6h10v4"/><path d="M2 21c2 1 4 1 6 0s4-1 6 0 4 1 6 0"/>'},
+    {id:'ports',       label:'Pelabuhan',      href:'ports.html',           svg:'<path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/>'}
   ]}
 ];
 
@@ -456,7 +470,7 @@ VESSELS.forEach(v => {
    EKSPOR
    ========================================================================= */
 PMS.data = {
-  NAV, PORTS,
+  APP, NAV, PORTS,
   LINES, lineOf, lineName, lineShort,
   BERTHS, BERTH_STATE, VESSELS, DERIVED,
   DAILY, ALERTS, SCHEDULE, CARGO,
