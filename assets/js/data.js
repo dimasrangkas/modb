@@ -46,7 +46,8 @@ const NAV = [
   {group:'Direktori', items:[
     {id:'shippinglines', label:'Perusahaan Pelayaran', href:'shipping-lines.html', svg:'<path d="M4 21c2 1.2 4 1.2 6 0s4-1.2 6 0 4 1.2 6 0"/><path d="M6 17l.8-8h10.4l.8 8"/><path d="M12 9V4h4l-4 3"/>'},
     {id:'vessels',     label:'Registri Kapal', href:'vessels.html',         svg:'<path d="M3 17l2-7h14l2 7"/><path d="M7 10V6h10v4"/><path d="M2 21c2 1 4 1 6 0s4-1 6 0 4 1 6 0"/>'},
-    {id:'ports',       label:'Pelabuhan',      href:'ports.html',           svg:'<path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/>'}
+    {id:'ports',       label:'Pelabuhan',      href:'ports.html',            svg:'<path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/>'},
+    {id:'SIMPUH',       label:'SIMPUH',      href:'https://simpuh-application.vercel.app/', svg:'<path d="M4 12c0-3 2-5 5-5 2 0 4 1 5 2l6-2v8l-6-2c-1 1-3 2-5 2-3 0-5-2-5-5z"/><circle cx="9" cy="11" r="1"/><path d="M14 9l5-3v8l-5-3"/>'}
   ]}
 ];
 
