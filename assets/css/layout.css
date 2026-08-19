@@ -76,7 +76,11 @@
 }
 
 /* -------------------------------------------------------- area utama & page */
-.main{grid-column:2;grid-row:2;padding:24px 26px 60px;max-width:1760px;}
+/* min-width:0 WAJIB ada. Sebagai grid item, .main default-nya min-width:auto
+   sehingga menolak menyusut di bawah lebar konten intrinsiknya — tabel lebar
+   (mis. Vessel Board, 16 kolom nowrap) akan mendorong seluruh grid .app
+   melebar dan yang menggeser jadi halamannya, bukan tabelnya. */
+.main{grid-column:2;grid-row:2;padding:24px 26px 60px;max-width:1760px;min-width:0;}
 .page[hidden]{display:none;}
 
 .page-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
